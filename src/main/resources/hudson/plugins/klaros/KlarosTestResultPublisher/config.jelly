@@ -39,7 +39,7 @@
       </select>
     </f:entry>
 
-    <f:entry title="${%ConfigurationID}">
+    <f:entry title="${%ProjectID}">
       <f:textbox field="config" />
   </f:entry>
 
