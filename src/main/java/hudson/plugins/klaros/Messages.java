@@ -29,7 +29,7 @@ import org.jvnet.localizer.ResourceBundleHolder;
 /**
  * The localized Messages.
  */
-public class Messages {
+public final class Messages {
 
     private static final ResourceBundleHolder HOLDER = ResourceBundleHolder
     .get(Messages.class);
