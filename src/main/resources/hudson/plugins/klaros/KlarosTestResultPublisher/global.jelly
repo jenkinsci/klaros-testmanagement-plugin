@@ -44,7 +44,7 @@
     <f:entry title="${%Section}">
       <f:repeatable var="inst" items="${descriptor.urls}" name="urls">
         <table width="100%">
-          <f:entry title="${%Url}" help="plugin/klaros-testmanagement/help-globalConfig.html">
+          <f:entry title="${%Url}" help="/plugin/klaros-testmanagement/help-globalConfig.html">
             <input class="setting-input" name="url.name"
               type="text" value="${inst}" checkUrl="'descriptorByName/KlarosTestResultPublisher/checkUrl?value='+escape(this.value)" />
           </f:entry>
