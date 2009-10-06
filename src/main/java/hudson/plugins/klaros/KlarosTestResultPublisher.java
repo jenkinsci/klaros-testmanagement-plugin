@@ -429,7 +429,7 @@ public class KlarosTestResultPublisher extends Recorder {
             BuildStepDescriptor<Publisher> {
 
         private static final String PROJECT_CONFIG_HTML = //
-        "/plugin/klaros-testmanagement-hudson-plugin/help-projectConfig.html";
+        "/plugin/klaros-testmanagement/help-projectConfig.html";
         private static final String URL_NAME = "url.name";
         /**
          * Global configuration information.
