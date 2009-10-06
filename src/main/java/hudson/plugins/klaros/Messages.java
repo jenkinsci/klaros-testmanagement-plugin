@@ -29,7 +29,6 @@ import org.jvnet.localizer.ResourceBundleHolder;
 /**
  * The localized Messages.
  */
-@SuppressWarnings({ "", "PMD" })
 public class Messages {
 
     private static final ResourceBundleHolder HOLDER = ResourceBundleHolder
