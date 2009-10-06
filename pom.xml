@@ -20,6 +20,19 @@
     <url>https://hudson.dev.java.net/issues/</url>
   </issueManagement>
 
+  <distributionManagement>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>java.net-m2-repository</id>
+      <url>java-net:/maven2-repository/trunk/repository/</url>
+    </repository>
+    <snapshotRepository>
+      <!-- prevent accidental deployment of SNAPSHOTS to repository -->
+      <id>local</id>
+      <url>file:.</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <scm>
     <connection>scm:svn:https://svn.dev.java.net/svn/hudson/trunk/hudson/plugins/klaros-testmanagement</connection>
     <url>http://fisheye4.cenqua.com/browse/hudson/trunk/hudson/</url>
