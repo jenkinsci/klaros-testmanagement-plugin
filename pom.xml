@@ -1,10 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>hudson.plugins.klaros</groupId>
   <artifactId>klaros-testmanagement</artifactId>
   <packaging>hpi</packaging>
-  <version>1.0</version>
+  <version>1.0-SNAPSHOT</version>
   <name>Klaros-Testmanagement plugin</name>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Klaros-Testmanagement+Plugin</url>
 
@@ -21,9 +22,8 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/klaros-testmanagement-1.0</connection>
-    <url>http://fisheye4.cenqua.com/browse/hudson/tags/klaros-testmanagement-1.0</url>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/klaros-testmanagement-1.0</developerConnection>
+    <connection>scm:svn:https://svn.dev.java.net/svn/hudson/trunk/hudson/plugins/klaros-testmanagement</connection>
+    <url>http://fisheye4.cenqua.com/browse/hudson/trunk/hudson/</url>
   </scm>
 
   <inceptionYear>2009</inceptionYear>
