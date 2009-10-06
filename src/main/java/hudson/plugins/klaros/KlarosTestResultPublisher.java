@@ -449,7 +449,7 @@ public class KlarosTestResultPublisher extends Recorder {
         @Override
         public String getDisplayName() {
 
-            return Messages.getDisplayName();
+            return Messages.DisplayName();
         }
 
         /**
@@ -598,7 +598,7 @@ public class KlarosTestResultPublisher extends Recorder {
             if (Util.fixEmpty(value) != null) {
                 return FormValidation.ok();
             } else {
-                return FormValidation.error(Messages.getErrorMissingInstallation());
+                return FormValidation.error(Messages.ErrorMissingInstallation());
             }
         }
 
