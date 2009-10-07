@@ -7,6 +7,7 @@
   <version>1.1-SNAPSHOT</version>
   <name>Klaros-Testmanagement plugin</name>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Klaros-Testmanagement+Plugin</url>
+  <description>Integrates Hudson with Klaros-Testmanagement by publishing the test results of a hudson build to the Klaros-Testmanagement application.</description>
 
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
@@ -15,10 +16,12 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <issueManagement>
-    <system>CollabNET</system>
-    <url>https://hudson.dev.java.net/issues/</url>
-  </issueManagement>
+  <licenses>
+    <license>
+      <name>MIT license</name>
+      <comments>All source code is under the MIT license.</comments>
+    </license>
+  </licenses>
 
   <scm>
     <connection>scm:svn:https://svn.dev.java.net/svn/hudson/trunk/hudson/plugins/klaros-testmanagement</connection>
