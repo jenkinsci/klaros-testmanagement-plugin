@@ -358,7 +358,7 @@ public class KlarosTestResultPublisher extends Recorder {
                                     .append(strURL).append("?").append(query);
                             String response = put.getResponseBodyAsString();
                             if (response != null && response.length() > 0) {
-                                msg.append("Reason: ").append(response);
+                                msg.append("\nReason: ").append(response);
                             }
                             listener.getLogger().println(msg.toString());
                         } else {
