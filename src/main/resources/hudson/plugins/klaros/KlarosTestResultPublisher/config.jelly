@@ -39,16 +39,28 @@
       </select>
     </f:entry>
 
-    <f:entry title="${%ProjectID}">
-      <f:textbox field="config" />
+    <f:entry title="${%Username}">
+      <f:textbox field="username" />
+    </f:entry>
+
+    <f:entry title="${%Password}">
+      <f:password field="password" />
+    </f:entry>
+
+  <f:validateButton
+   title="${%Test Connection}" progress="${%Testing...}"
+   method="testConnection" with="url,username,password" />
+
+  <f:entry title="${%ProjectID}">
+    <f:textbox field="config" />
   </f:entry>
 
-    <f:entry title="${%TestEnvironmentID}">
-      <f:textbox field="env" />
+  <f:entry title="${%TestEnvironmentID}">
+    <f:textbox field="env" />
   </f:entry>
 
-    <f:entry title="${%SystemUnderTestID}">
-      <f:textbox field="sut" />
+  <f:entry title="${%SystemUnderTestID}">
+    <f:textbox field="sut" />
   </f:entry>
 
   <f:entry title="${%TestReportFiles}"
