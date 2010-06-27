@@ -64,7 +64,7 @@
   </f:entry>
 
   <f:entry title="${%TestReportFiles}"
-    description="${%ReportDescription}">
+    description="${%ReportDescription('http://ant.apache.org/manual/Types/fileset.html')}">
       <f:textbox field="pathTestResults"
       checkUrl="'descriptorByName/KlarosTestResultPublisher/check?value='+escape(this.value)" />
   </f:entry>
