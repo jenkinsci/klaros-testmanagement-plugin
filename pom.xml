@@ -6,13 +6,13 @@
   <packaging>hpi</packaging>
   <version>1.2-SNAPSHOT</version>
   <name>Klaros-Testmanagement plugin</name>
-  <url>http://wiki.hudson-ci.org/display/HUDSON/Klaros-Testmanagement+Plugin</url>
-  <description>Integrates Hudson with Klaros-Testmanagement by publishing the test results of a hudson build to the Klaros-Testmanagement application.</description>
+  <url>http://wiki.jenkins-ci.org/display/JENKINS/Klaros-Testmanagement+Plugin</url>
+  <description>Integrates Jenkins with Klaros-Testmanagement by publishing the test results of a build to the Klaros-Testmanagement application.</description>
 
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.337</version><!-- which version of Hudson is this plugin built against? -->
+    <version>1.377</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -22,12 +22,6 @@
       <comments>All source code is under the MIT license.</comments>
     </license>
   </licenses>
-
-  <scm>
-    <connection>scm:svn:https://svn.dev.java.net/svn/hudson/trunk/hudson/plugins/klaros-testmanagement</connection>
-    <url>http://fisheye4.cenqua.com/browse/hudson/trunk/hudson/</url>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/trunk/hudson/plugins/klaros-testmanagement</developerConnection>
-  </scm>
 
   <inceptionYear>2009</inceptionYear>
   <organization>
