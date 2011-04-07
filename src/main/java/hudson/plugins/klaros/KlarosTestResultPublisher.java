@@ -42,6 +42,7 @@ import hudson.util.FormValidation;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +72,10 @@ import org.kohsuke.stapler.StaplerRequest;
  * @author Caroline Albuquerque (albuquerque@verit.de)
  * @author Torsten Stolpmann (stolpmann@verit.de)
  */
-public class KlarosTestResultPublisher extends Recorder {
+public class KlarosTestResultPublisher extends Recorder implements Serializable {
+
+    /** The serial version UID. */
+    private static final long serialVersionUID = -3220438013049857329L;
 
     /** The config. */
     private String config;
@@ -136,7 +140,7 @@ public class KlarosTestResultPublisher extends Recorder {
      *
      * @return the descriptor implementation
      */
-    public static DescriptorImpl descriptor() {
+    public DescriptorImpl descriptor() {
         return Hudson.getInstance().getDescriptorByType(
                 KlarosTestResultPublisher.DescriptorImpl.class);
     }
