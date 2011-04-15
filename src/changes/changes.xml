@@ -6,7 +6,12 @@
   </properties>
   <body>
 
-    <release version="1.0" date="2011-04-07" description="Slave compatibility fixes.">
+    <release version="1.4" date="2011-04-15" description="Slave compatibility fixes.">
+      <action dev="stolp" type="fix">No longer tries to access the master instance on slave nodes.</action>
+      <action dev="stolp" type="fix">No longer sends authentication parameters for empty user names.</action>
+    </release>
+
+    <release version="1.3" date="2011-04-07" description="Slave compatibility fixes.">
       <action dev="stolp" type="fix">Remote messages from slaves now work correctly.</action>
     </release>
 
