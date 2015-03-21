@@ -65,7 +65,7 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 /**
- * Klaros test result publisher class. When a publish is performed, the
+ * Klaros-Testmanagement test result publisher class. When a publish is performed, the
  * {@link #perform(AbstractBuild, Launcher, BuildListener)} method will be invoked.
  *
  * @author Caroline Albuquerque (albuquerque@verit.de)
@@ -73,16 +73,15 @@ import org.kohsuke.stapler.StaplerRequest;
  */
 public class KlarosTestResultPublisher extends Recorder implements Serializable {
 
-    /** The serial version UID. */
     private static final long serialVersionUID = -3220438013049857329L;
 
-    /** The config. */
+    /** The Klaros project id. */
     private String config;
 
-    /** The env. */
+    /** The Klaros test environment id. */
     private String env;
 
-    /** The sut. */
+    /** The Klaros system under test id. */
     private String sut;
 
     /** The type. */
@@ -91,17 +90,17 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     /** The path test results. */
     private String pathTestResults;
 
-    /** The url. */
+    /** The Klaros URL to connect to. */
     private String url;
 
-    /** The username. */
+    /** The username used to authenticate with Klaros. */
     private String username;
 
-    /** The password. */
+    /** The password used to authenticate with Klaros. */
     private String password;
 
     /**
-     * Instantiates a new klaros test result publisher.
+     * Instantiates a new Klaros test result publisher.
      *
      * @param config the Klaros project configuration to use
      * @param env the Klaros test environment to use
@@ -138,9 +137,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     }
 
     /**
-     * Gets the config.
+     * Gets the Klaros project id.
      *
-     * @return the config
+     * @return the project id
      */
     public String getConfig() {
 
@@ -148,9 +147,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     }
 
     /**
-     * Sets the config.
+     * Sets the Klaros project id.
      *
-     * @param value the new config
+     * @param value the new project id
      */
     public void setConfig(final String value) {
 
@@ -158,9 +157,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     }
 
     /**
-     * Gets the env.
+     * Gets the Klaros test environment id.
      *
-     * @return the env
+     * @return the test environment id
      */
     public String getEnv() {
 
@@ -168,9 +167,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     }
 
     /**
-     * Sets the env.
+     * Sets the Klaros test environment id.
      *
-     * @param value the new env
+     * @param value the new test environment id
      */
     public void setEnv(final String value) {
 
@@ -238,9 +237,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     }
 
     /**
-     * Gets the sut.
+     * Gets the Klaros system under test id.
      *
-     * @return the sut
+     * @return the system under test id
      */
     public String getSut() {
 
@@ -248,9 +247,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     }
 
     /**
-     * Sets the sut.
+     * Sets the Klaros system under test id.
      *
-     * @param value the new sut
+     * @param value the new system under test id
      */
     public void setSut(final String value) {
 
