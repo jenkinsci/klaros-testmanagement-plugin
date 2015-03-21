@@ -428,10 +428,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     private final class FileCallableImplementation implements FileCallable<List<Integer>> {
 
-        /** The serial version UID. */
         private static final long serialVersionUID = 1560913900801548965L;
 
-        /** The listener. */
+        /** The build listener. */
         private final BuildListener listener;
 
         private String klarosUrl;
@@ -439,7 +438,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         /**
          * Instantiates a new file callable implementation.
          *
-         * @param listener the listener
+         * @param listener the build listener
          */
         private FileCallableImplementation(final BuildListener listener) {
 
@@ -447,7 +446,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         }
 
         /**
-         * Invoke.
+         * Invoke the build publisher.
          *
          * @param baseDir the base directory
          * @param channel the channel
