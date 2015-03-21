@@ -392,17 +392,11 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public BuildStepMonitor getRequiredMonitorService() {
 
         return BuildStepMonitor.NONE;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public BuildStepDescriptor<Publisher> getDescriptor() {
 
@@ -577,7 +571,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         }
 
         /**
-         * This human readable name is used in the configuration screen. {@inheritDoc}
+         * This human readable name is used in the configuration screen.
          */
         @Override
         public String getDisplayName() {
@@ -585,9 +579,6 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
             return Messages.DisplayName();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public boolean configure(final StaplerRequest req, final JSONObject json)
                 throws hudson.model.Descriptor.FormException {
@@ -603,18 +594,13 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
             return super.configure(req, json);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
-        public boolean isApplicable(final Class<? extends AbstractProject> jobType) {
+        public boolean isApplicable(
+                @SuppressWarnings("rawtypes") final Class<? extends AbstractProject> jobType) {
 
             return true; // for all types
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getHelpFile() {
 
