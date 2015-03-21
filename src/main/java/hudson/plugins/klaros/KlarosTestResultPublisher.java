@@ -57,6 +57,7 @@ import org.apache.commons.httpclient.methods.FileRequestEntity;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.FileSet;
 import org.kohsuke.stapler.AncestorInPath;
@@ -153,7 +154,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public void setConfig(final String value) {
 
-        config = value;
+        config = StringUtils.trim(value);
     }
 
     /**
@@ -173,7 +174,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public void setEnv(final String value) {
 
-        env = value;
+        env = StringUtils.trim(value);
     }
 
     /**
@@ -193,7 +194,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public void setUrl(final String value) {
 
-        url = value;
+        url = StringUtils.trim(value);
     }
 
     /**
@@ -213,7 +214,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public void setUsername(final String value) {
 
-        username = value;
+        username = StringUtils.trim(value);
     }
 
     /**
@@ -233,7 +234,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public void setPassword(final String value) {
 
-        password = value;
+        password = StringUtils.trim(value);
     }
 
     /**
@@ -253,7 +254,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public void setSut(final String value) {
 
-        sut = value;
+        sut = StringUtils.trim(value);
     }
 
     /**
@@ -273,7 +274,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public void setPathTestResults(final String value) {
 
-        pathTestResults = value;
+        pathTestResults = StringUtils.trim(value);
     }
 
     /**
