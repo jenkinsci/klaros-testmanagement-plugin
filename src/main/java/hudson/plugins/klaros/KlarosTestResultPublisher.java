@@ -108,6 +108,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     /** The password used to authenticate with Klaros. */
     private String password;
 
+    /** The create test suite flag. */
+    private boolean createTestSuite;
+
     /**
      * Instantiates a new Klaros test result publisher.
      *
@@ -123,13 +126,14 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     @DataBoundConstructor
     public KlarosTestResultPublisher(final String config, final String env,
-            final String sut, final String type, final String pathTestResults,
+            final String sut, final boolean createTestSuite, final String type, final String pathTestResults,
             final ResultSet[] resultSets, final String url, final String username,
             final String password) {
 
         this.config = config;
         this.env = env;
         this.sut = sut;
+        this.createTestSuite = createTestSuite;
         this.pathTestResults = pathTestResults;
         this.resultSets = resultSets;
         // Migrate old settings
@@ -271,6 +275,16 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     public void setSut(final String value) {
 
         sut = StringUtils.trim(value);
+    }
+
+    public boolean isCreateTestSuite() {
+
+        return createTestSuite;
+    }
+
+    public void setCreateTestSuite(boolean createTestSuite) {
+
+        this.createTestSuite = createTestSuite;
     }
 
     /**
@@ -534,6 +548,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                     StringBuffer query = new StringBuffer("config=").append(config)
                             .append("&env=").append(env).append("&sut=").append(sut)
                             .append("&type=").append(type);
+                    if (createTestSuite) {
+                        query.append("&createTestSuiteResults=true");
+                    }
                     if (username != null && !username.equals("")) {
                         query.append("&username=").append(username).append("&password=")
                                 .append(password);

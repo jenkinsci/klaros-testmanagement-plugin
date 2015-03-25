@@ -76,6 +76,10 @@
     <f:textbox field="sut" />
   </f:entry>
 
+  <f:entry title="${%CreateTestSuite}">
+    <f:checkbox field="createTestSuite" />
+  </f:entry>
+
   <f:entry title="${%TestResults}" name="resultSets"
     description="${%ReportDescription('http://ant.apache.org/manual/Types/fileset.html')}">
     <f:repeatable var="resultSet" items="${instance.resultSets}" name="resultSets" minimum="1" noAddButton="false">
