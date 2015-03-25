@@ -360,47 +360,59 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
             final BuildListener listener) {
 
         boolean result = false;
+        if (Result.SUCCESS.equals(build.getResult())
+                || Result.UNSTABLE.equals(build.getResult())) {
 
-        FilePath ws = build.getWorkspace();
-        if (ws == null) {
-            listener.error("No workspace defined!");
-            build.setResult(Result.FAILURE);
-            result = false;
-        } else {
-            for (ResultSet resultSet : getResultSets()) {
-                if (StringUtils.isEmpty(resultSet.getSpec())) {
-                    listener.getLogger().println(
-                            "Empty result spec implementation detected");
-                } else {
-                    listener.getLogger().println(
-                            "The test result(s) contained in target "
-                                    + resultSet.getSpec() + " will be exported to the "
-                                    + "Klaros-Testmanagement Server at " + getUrl(url)
-                                    + ".");
-                    listener.getLogger().println(
-                            "With parameters Project[" + config + "], Environment[" + env
-                                    + "], SUT[" + sut + "] and Type[" + type + "].");
+            FilePath ws = build.getWorkspace();
+            if (ws == null) {
+                listener.error("No workspace defined!");
+                build.setResult(Result.FAILURE);
+                result = false;
+            } else {
+                for (ResultSet resultSet : getResultSets()) {
+                    if (StringUtils.isEmpty(resultSet.getSpec())) {
+                        listener.getLogger().println(
+                                "Empty result spec implementation detected");
+                    } else {
+                        listener.getLogger().println(
+                                "The test result(s) contained in target "
+                                        + resultSet.getSpec()
+                                        + " will be exported to the "
+                                        + "Klaros-Testmanagement Server at "
+                                        + getUrl(url) + ".");
+                        listener.getLogger().println(
+                                "With parameters Project[" + config + "], Environment["
+                                        + env + "], SUT[" + sut + "] and Type[" + type
+                                        + "].");
 
-                    try {
-                        FileCallableImplementation exporter = new FileCallableImplementation(
-                                listener);
-                        exporter.setKlarosUrl(getKlarosUrl(url));
-                        exporter.setResultSet(resultSet);
-                        ws.act(exporter);
+                        try {
+                            FileCallableImplementation exporter = new FileCallableImplementation(
+                                    listener);
+                            exporter.setKlarosUrl(getKlarosUrl(url));
+                            exporter.setResultSet(resultSet);
+                            ws.act(exporter);
 
-                    } catch (IOException e) {
-                        listener.getLogger().println("Failure to export test result(s).");
-                        e.printStackTrace(listener.getLogger());
-                    } catch (InterruptedException e) {
-                        listener.getLogger().println("Failure to export test result(s).");
-                        e.printStackTrace(listener.getLogger());
+                        } catch (IOException e) {
+                            listener.getLogger().println(
+                                    "Failure to export test result(s).");
+                            e.printStackTrace(listener.getLogger());
+                        } catch (InterruptedException e) {
+                            listener.getLogger().println(
+                                    "Failure to export test result(s).");
+                            e.printStackTrace(listener.getLogger());
+                        }
+
+                        listener.getLogger().println(
+                                "Test result(s) successfully exported.");
+
+                        result = true;
                     }
-
-                    listener.getLogger().println("Test result(s) successfully exported.");
-
-                    result = true;
                 }
             }
+        } else {
+            listener.getLogger().println(
+                    "Skipping export of test results to Klaros-Testmangement due to build status");
+            result = true;
         }
         return result;
     }
