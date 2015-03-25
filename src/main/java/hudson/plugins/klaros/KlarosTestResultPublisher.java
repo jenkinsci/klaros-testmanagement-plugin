@@ -25,14 +25,14 @@ package hudson.plugins.klaros;
 
 import hudson.Extension;
 import hudson.FilePath;
+import hudson.FilePath.FileCallable;
 import hudson.Launcher;
 import hudson.Util;
-import hudson.FilePath.FileCallable;
+import hudson.model.BuildListener;
+import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
 import hudson.model.Hudson;
-import hudson.model.Result;
 import hudson.remoting.VirtualChannel;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -53,6 +53,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.FileRequestEntity;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
@@ -88,8 +89,15 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     /** The type. */
     private String type = "junit";
 
-    /** The path test results. */
+    /**
+     * The path test results.
+     * 
+     * @deprecated since 1.5
+     */
     private String pathTestResults;
+
+    /** The test result sets. */
+    private ResultSet[] resultSets = new ResultSet[0];
 
     /** The Klaros URL to connect to. */
     private String url;
@@ -108,6 +116,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      * @param sut the Klaros system under test to use
      * @param type the type of test result to import
      * @param pathTestResults the path to the test results
+     * @param resultSets the test result sets
      * @param url the Klaros application url
      * @param username the optional Klaros login user name
      * @param password the optional Klaros login password
@@ -115,12 +124,19 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     @DataBoundConstructor
     public KlarosTestResultPublisher(final String config, final String env,
             final String sut, final String type, final String pathTestResults,
-            final String url, final String username, final String password) {
+            final ResultSet[] resultSets, final String url, final String username,
+            final String password) {
 
         this.config = config;
         this.env = env;
         this.sut = sut;
         this.pathTestResults = pathTestResults;
+        this.resultSets = resultSets;
+        // Migrate old settings
+        if (StringUtils.isNotEmpty(pathTestResults)) {
+            this.resultSets = new ResultSet[]{new ResultSet(StringUtils
+                    .trim(pathTestResults)) };
+        }
         this.url = url;
         this.username = username;
         this.password = password;
@@ -261,6 +277,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      * Gets the path test results.
      *
      * @return the path test results
+     * @deprecated use getResultSets() instead
      */
     public String getPathTestResults() {
 
@@ -271,10 +288,31 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      * Sets the path test results.
      *
      * @param value the new path test results
+     * @deprecated use setResultSets() instead
      */
     public void setPathTestResults(final String value) {
 
         pathTestResults = StringUtils.trim(value);
+    }
+
+    /**
+     * Gets the result sets.
+     *
+     * @return the result sets
+     */
+    public ResultSet[] getResultSets() {
+
+        return resultSets;
+    }
+
+    /**
+     * Sets the result sets.
+     *
+     * @param values the new result sets
+     */
+    public void setResultSets(ResultSet[] values) {
+
+        resultSets = values;
     }
 
     /**
@@ -321,44 +359,47 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher,
             final BuildListener listener) {
 
-        final boolean result;
+        boolean result = false;
 
-        if (pathTestResults == null) {
-            listener.getLogger().println("There are no test result to import!");
+        FilePath ws = build.getWorkspace();
+        if (ws == null) {
+            listener.error("No workspace defined!");
+            build.setResult(Result.FAILURE);
             result = false;
         } else {
-            listener.getLogger().println(
-                    "The test result(s) contained in target " + pathTestResults
-                            + " will be exported to the "
-                            + "Klaros-Testmanagement Server at " + getUrl(url) + ".");
-            listener.getLogger().println(
-                    "With parameters Project[" + config + "], Environment[" + env
-                            + "], SUT[" + sut + "] and Type[" + type + "].");
+            for (ResultSet resultSet : getResultSets()) {
+                if (StringUtils.isEmpty(resultSet.getSpec())) {
+                    listener.getLogger().println(
+                            "Empty result spec implementation detected");
+                } else {
+                    listener.getLogger().println(
+                            "The test result(s) contained in target "
+                                    + resultSet.getSpec() + " will be exported to the "
+                                    + "Klaros-Testmanagement Server at " + getUrl(url)
+                                    + ".");
+                    listener.getLogger().println(
+                            "With parameters Project[" + config + "], Environment[" + env
+                                    + "], SUT[" + sut + "] and Type[" + type + "].");
 
-            FilePath ws = build.getWorkspace();
-            if (ws == null) {
-                listener.error("No workspace defined!");
-                build.setResult(Result.FAILURE);
-                result = false;
-            } else {
+                    try {
+                        FileCallableImplementation exporter = new FileCallableImplementation(
+                                listener);
+                        exporter.setKlarosUrl(getKlarosUrl(url));
+                        exporter.setResultSet(resultSet);
+                        ws.act(exporter);
 
-                try {
-                    FileCallableImplementation exporter = new FileCallableImplementation(
-                            listener);
-                    exporter.setKlarosUrl(getKlarosUrl(url));
-                    ws.act(exporter);
+                    } catch (IOException e) {
+                        listener.getLogger().println("Failure to export test result(s).");
+                        e.printStackTrace(listener.getLogger());
+                    } catch (InterruptedException e) {
+                        listener.getLogger().println("Failure to export test result(s).");
+                        e.printStackTrace(listener.getLogger());
+                    }
 
-                } catch (IOException e) {
-                    listener.getLogger().println("Failure to export test result(s).");
-                    e.printStackTrace(listener.getLogger());
-                } catch (InterruptedException e) {
-                    listener.getLogger().println("Failure to export test result(s).");
-                    e.printStackTrace(listener.getLogger());
+                    listener.getLogger().println("Test result(s) successfully exported.");
+
+                    result = true;
                 }
-
-                listener.getLogger().println("Test result(s) successfully exported.");
-
-                result = true;
             }
         }
         return result;
@@ -430,10 +471,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
         private static final long serialVersionUID = 1560913900801548965L;
 
-        /** The build listener. */
         private final BuildListener listener;
-
         private String klarosUrl;
+        private ResultSet resultSet;
 
         /**
          * Instantiates a new file callable implementation.
@@ -459,7 +499,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
             List<Integer> results = new ArrayList<Integer>();
 
-            FileSet src = Util.createFileSet(baseDir, pathTestResults);
+            FileSet src = Util.createFileSet(baseDir, resultSet.getSpec());
             DirectoryScanner ds = src.getDirectoryScanner();
             ds.scan();
             if (ds.getIncludedFilesCount() == 0) {
@@ -469,8 +509,12 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
             // Get target URL
             String targetUrl = klarosUrl;
+
             if (targetUrl != null) {
                 String strURL = buildServletURL(targetUrl);
+
+                // Get HTTP client
+                HttpClient httpclient = new HttpClient();
 
                 // Prepare HTTP PUT
                 for (String f : ds.getIncludedFiles()) {
@@ -486,37 +530,34 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
                     File file = new File(baseDir, f);
                     int result;
+
+                    RequestEntity entity = new FileRequestEntity(file,
+                            "text/xml; charset=ISO-8859-1");
+                    put.setRequestEntity(entity);
+
+                    // Execute request
                     try {
-                        RequestEntity entity = new FileRequestEntity(file,
-                                "text/xml; charset=ISO-8859-1");
-                        put.setRequestEntity(entity);
-                        // Get HTTP client
-                        HttpClient httpclient = new HttpClient();
+                        result = httpclient.executeMethod(put);
 
-                        // Execute request
-                        try {
-                            result = httpclient.executeMethod(put);
-
-                            if (result != HttpServletResponse.SC_OK) {
-                                StringBuffer msg = new StringBuffer()
-                                        .append("Export of ").append(file.getName())
-                                        .append(" failed - Response status code: ")
-                                        .append(result).append(" for request URL: ")
-                                        .append(strURL).append("?").append(query);
-                                String response = new String(put.getResponseBody());
-                                if (response != null && response.length() > 0) {
-                                    msg.append("\nReason: ").append(response);
-                                }
-                                listener.getLogger().println(msg.toString());
-                            } else {
-                                results.add(result);
-                                listener.getLogger().println(
-                                        "Test result file " + file.getName()
-                                                + " has been successfully exported.");
+                        if (result != HttpServletResponse.SC_OK) {
+                            StringBuffer msg = new StringBuffer().append("Export of ")
+                                    .append(file.getName()).append(
+                                            " failed - Response status code: ").append(
+                                            result).append(" for request URL: ").append(
+                                            strURL).append("?").append(query);
+                            String response = new String(put.getResponseBody());
+                            if (response != null && response.length() > 0) {
+                                msg.append("\nReason: ").append(response);
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace(listener.getLogger());
+                            listener.getLogger().println(msg.toString());
+                        } else {
+                            results.add(result);
+                            listener.getLogger().println(
+                                    "Test result file " + file.getName()
+                                            + " has been successfully exported.");
                         }
+                    } catch (Exception e) {
+                        e.printStackTrace(listener.getLogger());
                     } finally {
                         // Release current connection to the connection pool
                         // once you
@@ -532,13 +573,23 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         }
 
         /**
+         * Sets the result set to deliver the results from.
+         *
+         * @param value the new result set
+         */
+        private void setResultSet(final ResultSet value) {
+
+            resultSet = value;
+        }
+
+        /**
          * Sets the Klaros url to deliver the results to.
          *
-         * @param url the new klaros url
+         * @param value the new klaros url
          */
-        private void setKlarosUrl(final String url) {
+        private void setKlarosUrl(final String value) {
 
-            klarosUrl = url;
+            klarosUrl = value;
         }
 
     }
@@ -660,7 +711,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                             result = FormValidation.ok();
                         } else {
                             result = FormValidation.error( //
-                                    "This is a valid URL but it doesn't look like Klaros-Testmanagement");
+                                    "This URL does not point to a running Klaros-Testmanagement installation");
                         }
                     } catch (IOException e) {
                         result = handleIOException(value, e);
@@ -728,38 +779,50 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                 query.append("username=").append(username).append("&password=").append(
                         password).append("&type=").append("check");
             }
-            System.out.println(strURL + '?' + query.toString());
             put.setQueryString(query.toString());
             try {
                 RequestEntity entity = new StringRequestEntity("",
                         "text/xml; charset=UTF-8", "UTF-8");
                 put.setRequestEntity(entity);
-                int result;
-                try {
-                    HttpClient client = new HttpClient();
-                    result = client.executeMethod(put);
-                    String response = "";
-                    if (result != HttpServletResponse.SC_OK) {
-                        StringBuffer msg = new StringBuffer();
-                        response = new String(put.getResponseBody());
-                        if (response != null && response.length() > 0) {
-                            msg.append("Connection failed: ").append(response);
-                            System.out.println(msg.toString());
-                        }
-                        return FormValidation.error(msg.toString());
-                    } else {
-                        if (response != null && response.length() > 0) {
-                            return FormValidation.ok(Messages.ConnectionEstablished()
-                                    + ": " + response);
-                        } else {
-                            return FormValidation.ok(Messages.ConnectionEstablished());
-                        }
-                    }
-                } finally {
-                    put.releaseConnection();
-                }
+                return putResultFile(put);
             } catch (Exception e) {
                 return FormValidation.error(e.getMessage());
+            }
+        }
+
+        /**
+         * HTTP Put the result file.
+         *
+         * @param put the put request
+         * @return the form validation
+         * @throws IOException Signals that an I/O exception has occurred.
+         * @throws HttpException the http exception
+         */
+        private FormValidation putResultFile(PutMethod put) throws IOException,
+                HttpException {
+
+            try {
+                HttpClient client = new HttpClient();
+                int result = client.executeMethod(put);
+                String response = "";
+                if (result != HttpServletResponse.SC_OK) {
+                    StringBuffer msg = new StringBuffer();
+                    response = new String(put.getResponseBody());
+                    if (response != null && response.length() > 0) {
+                        msg.append("Connection failed: ").append(response);
+                        System.out.println(msg.toString());
+                    }
+                    return FormValidation.error(msg.toString());
+                } else {
+                    if (response != null && response.length() > 0) {
+                        return FormValidation.ok(Messages.ConnectionEstablished() + ": "
+                                + response);
+                    } else {
+                        return FormValidation.ok(Messages.ConnectionEstablished());
+                    }
+                }
+            } finally {
+                put.releaseConnection();
             }
         }
     }

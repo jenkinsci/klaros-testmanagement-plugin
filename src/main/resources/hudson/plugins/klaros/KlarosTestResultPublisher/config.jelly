@@ -76,10 +76,23 @@
     <f:textbox field="sut" />
   </f:entry>
 
-  <f:entry title="${%TestReportFiles}"
+  <f:entry title="${%TestResults}" name="resultSets"
     description="${%ReportDescription('http://ant.apache.org/manual/Types/fileset.html')}">
-      <f:textbox field="pathTestResults"
-      checkUrl="'descriptorByName/KlarosTestResultPublisher/check?value='+escape(this.value)" />
+    <f:repeatable var="resultSet" items="${instance.resultSets}" name="resultSets" minimum="1" noAddButton="false">
+      <table width="100%">
+        <f:entry title="${%TestResultSpec}" field="spec"
+          description="${%ReportDescription('http://ant.apache.org/manual/Types/fileset.html')}">
+          <f:textbox value="${resultSet.spec}"
+            checkUrl="'descriptorByName/KlarosTestResultPublisher/check?value='+escape(this.value)" />
+        </f:entry>
+
+        <f:entry title="">
+          <div align="right">
+            <f:repeatableDeleteButton />
+          </div>
+        </f:entry>
+      </table>
+    </f:repeatable>
   </f:entry>
 
 </j:jelly>
