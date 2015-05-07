@@ -80,6 +80,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     /** The Klaros project id. */
     private String config;
 
+    /** The Klaros iteration id. */
+    private String iteration;
+
     /** The Klaros test environment id. */
     private String env;
 
@@ -114,9 +117,10 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     /**
      * Instantiates a new Klaros test result publisher.
      *
-     * @param config the Klaros project configuration to use
-     * @param env the Klaros test environment to use
-     * @param sut the Klaros system under test to use
+     * @param config the Klaros project configuration id to use
+     * @param iteration the optional Klaros iteration id to use
+     * @param env the Klaros test environment id to use
+     * @param sut the Klaros system under test id to use
      * @param type the type of test result to import
      * @param pathTestResults the path to the test results
      * @param resultSets the test result sets
@@ -125,12 +129,12 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      * @param password the optional Klaros login password
      */
     @DataBoundConstructor
-    public KlarosTestResultPublisher(final String config, final String env,
+    public KlarosTestResultPublisher(final String config, final String iteration, final String env,
             final String sut, final boolean createTestSuite, final String type, final String pathTestResults,
-            final ResultSet[] resultSets, final String url, final String username,
-            final String password) {
+            final ResultSet[] resultSets, final String url, final String username, final String password) {
 
         this.config = config;
+        this.iteration = iteration;
         this.env = env;
         this.sut = sut;
         this.createTestSuite = createTestSuite;
@@ -138,8 +142,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         this.resultSets = resultSets;
         // Migrate old settings
         if (StringUtils.isNotEmpty(pathTestResults)) {
-            this.resultSets = new ResultSet[]{new ResultSet(StringUtils
-                    .trim(pathTestResults)) };
+            this.resultSets = new ResultSet[]{new ResultSet(StringUtils.trim(pathTestResults)) };
         }
         this.url = url;
         this.username = username;
@@ -153,8 +156,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public DescriptorImpl descriptor() {
 
-        return Hudson.getInstance().getDescriptorByType(
-                KlarosTestResultPublisher.DescriptorImpl.class);
+        return Hudson.getInstance().getDescriptorByType(KlarosTestResultPublisher.DescriptorImpl.class);
     }
 
     /**
@@ -175,6 +177,26 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     public void setConfig(final String value) {
 
         config = StringUtils.trim(value);
+    }
+
+    /**
+     * Gets the Klaros iteration i.
+     *
+     * @return the iteration id
+     */
+    public String getIteration() {
+
+        return iteration;
+    }
+
+    /**
+     * Sets the Klaros iteration id.
+     *
+     * @param iteration the new iteration id
+     */
+    public void setIteration(final String iteration) {
+
+        this.iteration = iteration;
     }
 
     /**
@@ -371,11 +393,10 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     @Override
     public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher,
-            final BuildListener listener) {
+        final BuildListener listener) {
 
         boolean result = false;
-        if (Result.SUCCESS.equals(build.getResult())
-                || Result.UNSTABLE.equals(build.getResult())) {
+        if (Result.SUCCESS.equals(build.getResult()) || Result.UNSTABLE.equals(build.getResult())) {
 
             FilePath ws = build.getWorkspace();
             if (ws == null) {
@@ -385,39 +406,34 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
             } else {
                 for (ResultSet resultSet : getResultSets()) {
                     if (StringUtils.isEmpty(resultSet.getSpec())) {
-                        listener.getLogger().println(
-                                "Empty result spec implementation detected");
+                        listener.getLogger().println("Empty result spec implementation detected");
                     } else {
                         listener.getLogger().println(
-                                "The test result(s) contained in target "
-                                        + resultSet.getSpec()
-                                        + " will be exported to the "
-                                        + "Klaros-Testmanagement Server at "
-                                        + getUrl(url) + ".");
+                            "The test result(s) contained in target " + resultSet.getSpec()
+                                + " will be exported to the " + "Klaros-Testmanagement Server at "
+                                + getUrl(url) + ".");
+                        listener.getLogger().print("With parameters Project[" + config + "]");
+                        if (StringUtils.isNotBlank(iteration)) {
+                            listener.getLogger().print(" Iteration[" + iteration + "]");
+                        }
                         listener.getLogger().println(
-                                "With parameters Project[" + config + "], Environment["
-                                        + env + "], SUT[" + sut + "] and Type[" + type
-                                        + "].");
+                            " Environment[" + env + "], SUT[" + sut + "] and Type[" + type + "].");
 
                         try {
-                            FileCallableImplementation exporter = new FileCallableImplementation(
-                                    listener);
+                            FileCallableImplementation exporter = new FileCallableImplementation(listener);
                             exporter.setKlarosUrl(getKlarosUrl(url));
                             exporter.setResultSet(resultSet);
                             ws.act(exporter);
 
                         } catch (IOException e) {
-                            listener.getLogger().println(
-                                    "Failure to export test result(s).");
+                            listener.getLogger().println("Failure to export test result(s).");
                             e.printStackTrace(listener.getLogger());
                         } catch (InterruptedException e) {
-                            listener.getLogger().println(
-                                    "Failure to export test result(s).");
+                            listener.getLogger().println("Failure to export test result(s).");
                             e.printStackTrace(listener.getLogger());
                         }
 
-                        listener.getLogger().println(
-                                "Test result(s) successfully exported.");
+                        listener.getLogger().println("Test result(s) successfully exported.");
 
                         result = true;
                     }
@@ -425,7 +441,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
             }
         } else {
             listener.getLogger().println(
-                    "Skipping export of test results to Klaros-Testmangement due to build status");
+                "Skipping export of test results to Klaros-Testmangement due to build status");
             result = true;
         }
         return result;
@@ -480,12 +496,11 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
         final String result;
         if (applicationURL.endsWith("/")) {
-            result = new StringBuffer(applicationURL.substring(0,
-                    applicationURL.length() - 1)).append("/seam/resource/rest/importer")
-                    .toString();
-        } else {
-            result = new StringBuffer(applicationURL).append(
+            result =
+                new StringBuffer(applicationURL.substring(0, applicationURL.length() - 1)).append(
                     "/seam/resource/rest/importer").toString();
+        } else {
+            result = new StringBuffer(applicationURL).append("/seam/resource/rest/importer").toString();
         }
         return result;
     }
@@ -520,8 +535,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
          * @throws IOException Signals that an I/O exception has occurred.
          * @see hudson.FilePath.FileCallable#invoke(File, hudson.remoting.VirtualChannel)
          */
-        public List<Integer> invoke(final File baseDir, final VirtualChannel channel)
-                throws IOException {
+        public List<Integer> invoke(final File baseDir, final VirtualChannel channel) throws IOException {
 
             List<Integer> results = new ArrayList<Integer>();
 
@@ -545,23 +559,24 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                 // Prepare HTTP PUT
                 for (String f : ds.getIncludedFiles()) {
                     PutMethod put = new PutMethod(strURL);
-                    StringBuffer query = new StringBuffer("config=").append(config)
-                            .append("&env=").append(env).append("&sut=").append(sut)
-                            .append("&type=").append(type);
+                    StringBuffer query = new StringBuffer("config=").append(config);
+                    if (StringUtils.isNotBlank(iteration)) {
+                        query.append("&iteration=").append(iteration);
+                    }
+                    query.append("&env=").append(env).append("&sut=").append(sut).append("&type=").append(
+                        type);
                     if (createTestSuite) {
                         query.append("&createTestSuiteResults=true");
                     }
                     if (username != null && !username.equals("")) {
-                        query.append("&username=").append(username).append("&password=")
-                                .append(password);
+                        query.append("&username=").append(username).append("&password=").append(password);
                     }
                     put.setQueryString(query.toString());
 
                     File file = new File(baseDir, f);
                     int result;
 
-                    RequestEntity entity = new FileRequestEntity(file,
-                            "text/xml; charset=ISO-8859-1");
+                    RequestEntity entity = new FileRequestEntity(file, "text/xml; charset=ISO-8859-1");
                     put.setRequestEntity(entity);
 
                     // Execute request
@@ -569,11 +584,10 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                         result = httpclient.executeMethod(put);
 
                         if (result != HttpServletResponse.SC_OK) {
-                            StringBuffer msg = new StringBuffer().append("Export of ")
-                                    .append(file.getName()).append(
-                                            " failed - Response status code: ").append(
-                                            result).append(" for request URL: ").append(
-                                            strURL).append("?").append(query);
+                            StringBuffer msg =
+                                new StringBuffer().append("Export of ").append(file.getName()).append(
+                                    " failed - Response status code: ").append(result).append(
+                                    " for request URL: ").append(strURL).append("?").append(query);
                             String response = new String(put.getResponseBody());
                             if (response != null && response.length() > 0) {
                                 msg.append("\nReason: ").append(response);
@@ -582,8 +596,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                         } else {
                             results.add(result);
                             listener.getLogger().println(
-                                    "Test result file " + file.getName()
-                                            + " has been successfully exported.");
+                                "Test result file " + file.getName() + " has been successfully exported.");
                         }
                     } catch (Exception e) {
                         e.printStackTrace(listener.getLogger());
@@ -632,7 +645,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
         /** The Constant PROJECT_CONFIG_HTML. */
         private static final String PROJECT_CONFIG_HTML = //
-        "/plugin/klaros-testmanagement/help-projectConfig.html";
+            "/plugin/klaros-testmanagement/help-projectConfig.html";
 
         /** The Constant URL_NAME. */
         private static final String URL_NAME = "url.name";
@@ -660,7 +673,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
         @Override
         public boolean configure(final StaplerRequest req, final JSONObject json)
-                throws hudson.model.Descriptor.FormException {
+            throws hudson.model.Descriptor.FormException {
 
             urls.clear();
             if (req.getParameterValues(URL_NAME) != null) {
@@ -675,7 +688,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
         @Override
         public boolean isApplicable(
-                @SuppressWarnings("rawtypes") final Class<? extends AbstractProject> jobType) {
+            @SuppressWarnings("rawtypes") final Class<? extends AbstractProject> jobType) {
 
             return true; // for all types
         }
@@ -717,8 +730,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
          * @throws IOException Signals that an I/O exception has occurred.
          * @throws ServletException the servlet exception
          */
-        public FormValidation doCheckUrl(final String value) throws IOException,
-                ServletException {
+        public FormValidation doCheckUrl(final String value) throws IOException, ServletException {
 
             return new FormValidation.URLCheck() {
 
@@ -740,7 +752,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                             result = FormValidation.ok();
                         } else {
                             result = FormValidation.error( //
-                                    "This URL does not point to a running Klaros-Testmanagement installation");
+                                "This URL does not point to a running Klaros-Testmanagement installation");
                         }
                     } catch (IOException e) {
                         result = handleIOException(value, e);
@@ -759,9 +771,8 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
          * @throws IOException Signals that an I/O exception has occurred.
          * @throws ServletException the servlet exception
          */
-        public FormValidation doCheck(
-                @AncestorInPath final AbstractProject<?, ?> project,
-                @QueryParameter final String value) throws IOException, ServletException {
+        public FormValidation doCheck(@AncestorInPath final AbstractProject<?, ?> project,
+            @QueryParameter final String value) throws IOException, ServletException {
 
             FilePath ws = project.getSomeWorkspace();
             return ws != null ? ws.validateFileMask(value, false) : FormValidation.ok();
@@ -775,8 +786,8 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
          * @throws IOException Signals that an I/O exception has occurred.
          * @throws ServletException the servlet exception
          */
-        public FormValidation doCheckInstallation(@QueryParameter final String value)
-                throws IOException, ServletException {
+        public FormValidation doCheckInstallation(@QueryParameter final String value) throws IOException,
+            ServletException {
 
             if (Util.fixEmpty(value) != null) {
                 return FormValidation.ok();
@@ -796,22 +807,20 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
          * @throws ServletException the servlet exception
          */
         public FormValidation doTestConnection(@QueryParameter final String url,
-                @QueryParameter final String username,
-                @QueryParameter final String password) throws IOException,
-                ServletException {
+            @QueryParameter final String username, @QueryParameter final String password) throws IOException,
+            ServletException {
 
             final String strURL = buildServletURL(url);
 
             PutMethod put = new PutMethod(strURL);
             StringBuffer query = new StringBuffer();
             if (username != null) {
-                query.append("username=").append(username).append("&password=").append(
-                        password).append("&type=").append("check");
+                query.append("username=").append(username).append("&password=").append(password).append(
+                    "&type=").append("check");
             }
             put.setQueryString(query.toString());
             try {
-                RequestEntity entity = new StringRequestEntity("",
-                        "text/xml; charset=UTF-8", "UTF-8");
+                RequestEntity entity = new StringRequestEntity("", "text/xml; charset=UTF-8", "UTF-8");
                 put.setRequestEntity(entity);
                 return putResultFile(put);
             } catch (Exception e) {
@@ -827,8 +836,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
          * @throws IOException Signals that an I/O exception has occurred.
          * @throws HttpException the http exception
          */
-        private FormValidation putResultFile(PutMethod put) throws IOException,
-                HttpException {
+        private FormValidation putResultFile(PutMethod put) throws IOException, HttpException {
 
             try {
                 HttpClient client = new HttpClient();
@@ -844,8 +852,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                     return FormValidation.error(msg.toString());
                 } else {
                     if (response != null && response.length() > 0) {
-                        return FormValidation.ok(Messages.ConnectionEstablished() + ": "
-                                + response);
+                        return FormValidation.ok(Messages.ConnectionEstablished() + ": " + response);
                     } else {
                         return FormValidation.ok(Messages.ConnectionEstablished());
                     }

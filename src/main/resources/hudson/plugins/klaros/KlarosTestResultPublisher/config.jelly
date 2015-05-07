@@ -68,6 +68,10 @@
     <f:textbox field="config" />
   </f:entry>
 
+  <f:entry title="${%IterationID}">
+    <f:textbox field="iteration" />
+  </f:entry>
+
   <f:entry title="${%TestEnvironmentID}">
     <f:textbox field="env" />
   </f:entry>
