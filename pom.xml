@@ -86,7 +86,7 @@
 
   <scm>
     <connection>scm:svn:https://svn.jenkins-ci.org/trunk/hudson/plugins/klaros-testmanagement</connection>
-    <developerConnection>scm:svn:https://stolp@svn.jenkins-ci.org/trunk/hudson/plugins/klaros-testmanagement</developerConnection>
+    <developerConnection>scm:svn:https://svn.jenkins-ci.org/trunk/hudson/plugins/klaros-testmanagement</developerConnection>
     <url>https://svn.jenkins-ci.org/trunk/hudson/plugins/klaros-testmanagement</url>
   </scm>
 
