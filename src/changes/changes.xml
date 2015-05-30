@@ -11,7 +11,7 @@
       <action dev="stolp" type="add">JENKINS-27596: Support the creation of test suites on test result import</action>
       <action dev="stolp" type="add">JENKINS-27593: Do not try to export test results for canceled or broken builds</action>
       <action dev="stolp" type="fix">JENKINS-27592: Support multiple test result set specifications for uploading</action>
-      <action dev="stolp" type="fix">JENKINS-15744: Whitespaces at the end of input fields leads to bogus file upload</action>
+      <action dev="stolp" type="fix">JENKINS-15744: Whitespace at the end of input fields leads to bogus file upload</action>
     </release>
 
     <release version="1.4" date="2011-04-15" description="Slave compatibility fixes.">
