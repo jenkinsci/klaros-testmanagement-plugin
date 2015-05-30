@@ -7,7 +7,7 @@
   <version>1.5-SNAPSHOT</version>
   <name>Klaros-Testmanagement plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Klaros-Testmanagement+Plugin</url>
-  <description>Integrates Jenkins with Klaros-Testmanagement by publishing the test results of a build to the Klaros-Testmanagement application.</description>
+  <description>Integrates Jenkins with Klaros-Testmanagement by publishing the test results of a Jenkins build to the Klaros-Testmanagement application.</description>
 
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
