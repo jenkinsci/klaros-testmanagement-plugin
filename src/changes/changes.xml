@@ -6,6 +6,14 @@
   </properties>
   <body>
 
+    <release version="1.5" date="2015-05-30" description="New fetures.">
+      <action dev="stolp" type="add">JENKINS-28296: Add support for iteration assignment of imported test runs</action>
+      <action dev="stolp" type="add">JENKINS-27596: Support the creation of test suites on test result import</action>
+      <action dev="stolp" type="add">JENKINS-27593: Do not try to export test results for canceled or broken builds</action>
+      <action dev="stolp" type="fix">JENKINS-27592: Support multiple test result set specifications for uploading</action>
+      <action dev="stolp" type="fix">JENKINS-15744: Whitespaces at the end of input fields leads to bogus file upload</action>
+    </release>
+
     <release version="1.4" date="2011-04-15" description="Slave compatibility fixes.">
       <action dev="stolp" type="fix">No longer tries to access the master instance on slave nodes.</action>
       <action dev="stolp" type="fix">No longer sends authentication parameters for empty user names.</action>
