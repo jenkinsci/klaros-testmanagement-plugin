@@ -94,7 +94,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
     /**
      * The path test results.
-     * 
+     *
      * @deprecated since 1.5
      */
     private String pathTestResults;
@@ -138,12 +138,8 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         this.env = env;
         this.sut = sut;
         this.createTestSuite = createTestSuite;
-        this.pathTestResults = pathTestResults;
         this.resultSets = resultSets;
-        // Migrate old settings
-        if (StringUtils.isNotEmpty(pathTestResults)) {
-            this.resultSets = new ResultSet[]{new ResultSet(StringUtils.trim(pathTestResults)) };
-        }
+        migratePathTestResults();
         this.url = url;
         this.username = username;
         this.password = password;
@@ -328,7 +324,18 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public void setPathTestResults(final String value) {
 
-        pathTestResults = StringUtils.trim(value);
+        migratePathTestResults();
+    }
+
+    /**
+     * Migrate deprecated path test results setting.
+     */
+    private void migratePathTestResults() {
+
+        if (StringUtils.isNotEmpty(pathTestResults)) {
+            resultSets = new ResultSet[]{new ResultSet(StringUtils.trim(pathTestResults)) };
+            pathTestResults = null;
+        }
     }
 
     /**
@@ -338,6 +345,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public ResultSet[] getResultSets() {
 
+        migratePathTestResults();
         return resultSets;
     }
 
