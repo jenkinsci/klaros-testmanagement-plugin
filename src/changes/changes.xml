@@ -6,7 +6,11 @@
   </properties>
   <body>
 
-    <release version="1.5" date="2015-05-30" description="New fetures.">
+    <release version="1.5.1" date="2015-05-30" description="Fix migration issues.">
+      <action dev="stolp" type="fix">JENKINS-28659: Add proper migration of test result path settings for existing projects</action>
+    </release>
+
+    <release version="1.5" date="2015-05-30" description="New features.">
       <action dev="stolp" type="add">JENKINS-28296: Add support for iteration assignment of imported test runs</action>
       <action dev="stolp" type="add">JENKINS-27596: Support the creation of test suites on test result import</action>
       <action dev="stolp" type="add">JENKINS-27593: Do not try to export test results for canceled or broken builds</action>
