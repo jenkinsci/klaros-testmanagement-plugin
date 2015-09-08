@@ -587,6 +587,10 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                         query.append("&createTestSuiteResults=true");
                     }
 
+                    query.append("&buildServerUrl=").append(Hudson.getInstance().getRootUrl());
+                    query.append("&buildJobId=").append(build.getProject().getName());
+                    query.append("&buildId=").append(build.getNumber());
+
                     if (StringUtils.isNotBlank(username)) {
                         query.append("&username=").append(expandVariables(username, build)).append(
                             "&password=").append(expandVariables(password, build));
