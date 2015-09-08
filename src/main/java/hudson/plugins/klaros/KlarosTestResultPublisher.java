@@ -46,6 +46,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -97,6 +98,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      *
      * @deprecated since 1.5
      */
+    @Deprecated
     private String pathTestResults;
 
     /** The test result sets. */
@@ -311,6 +313,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      * @return the path test results
      * @deprecated use getResultSets() instead
      */
+    @Deprecated
     public String getPathTestResults() {
 
         return pathTestResults;
@@ -322,6 +325,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      * @param value the new path test results
      * @deprecated use setResultSets() instead
      */
+    @Deprecated
     public void setPathTestResults(final String value) {
 
         migratePathTestResults();
@@ -374,8 +378,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         String result = null;
 
         if (sourceURL == null) {
-            // if only one URL is configured, "default URL" should mean that
-            // URL.
+            // if only one URL is configured, "default URL" should mean that URL.
             List<String> urls = descriptor().getUrls();
             if (urls.size() >= 1) {
                 result = urls.get(0);
@@ -428,7 +431,8 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                             " Environment[" + env + "], SUT[" + sut + "] and Type[" + type + "].");
 
                         try {
-                            FileCallableImplementation exporter = new FileCallableImplementation(listener);
+                            FileCallableImplementation exporter =
+                                new FileCallableImplementation(build, listener);
                             exporter.setKlarosUrl(getKlarosUrl(url));
                             exporter.setResultSet(resultSet);
                             ws.act(exporter);
@@ -520,6 +524,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
         private static final long serialVersionUID = 1560913900801548965L;
 
+        private final AbstractBuild<?, ?> build;
         private final BuildListener listener;
         private String klarosUrl;
         private ResultSet resultSet;
@@ -529,8 +534,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
          *
          * @param listener the build listener
          */
-        private FileCallableImplementation(final BuildListener listener) {
+        private FileCallableImplementation(final AbstractBuild<?, ?> build, final BuildListener listener) {
 
+            this.build = build;
             this.listener = listener;
         }
 
@@ -541,9 +547,12 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
          * @param channel the channel
          * @return the list of http return codes
          * @throws IOException Signals that an I/O exception has occurred.
+         * @throws InterruptedException Thrown when a thread is waiting, sleeping, or otherwise paused for a
+         *             long time and another thread interrupts it using the interrupt method in class Thread.
          * @see hudson.FilePath.FileCallable#invoke(File, hudson.remoting.VirtualChannel)
          */
-        public List<Integer> invoke(final File baseDir, final VirtualChannel channel) throws IOException {
+        public List<Integer> invoke(final File baseDir, final VirtualChannel channel) throws IOException,
+            InterruptedException {
 
             List<Integer> results = new ArrayList<Integer>();
 
@@ -566,18 +575,21 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
                 // Prepare HTTP PUT
                 for (String f : ds.getIncludedFiles()) {
-                    PutMethod put = new PutMethod(strURL);
-                    StringBuffer query = new StringBuffer("config=").append(config);
+                    final PutMethod put = new PutMethod(strURL);
+                    final StringBuffer query =
+                        new StringBuffer("config=").append(expandVariables(config, build));
                     if (StringUtils.isNotBlank(iteration)) {
-                        query.append("&iteration=").append(iteration);
+                        query.append("&iteration=").append(expandVariables(iteration, build));
                     }
-                    query.append("&env=").append(env).append("&sut=").append(sut).append("&type=").append(
-                        type);
+                    query.append("&env=").append(expandVariables(env, build)).append("&sut=").append(
+                        expandVariables(sut, build)).append("&type=").append(expandVariables(type, build));
                     if (createTestSuite) {
                         query.append("&createTestSuiteResults=true");
                     }
-                    if (username != null && !username.equals("")) {
-                        query.append("&username=").append(username).append("&password=").append(password);
+
+                    if (StringUtils.isNotBlank(username)) {
+                        query.append("&username=").append(expandVariables(username, build)).append(
+                            "&password=").append(expandVariables(password, build));
                     }
                     put.setQueryString(query.toString());
 
@@ -609,10 +621,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                     } catch (Exception e) {
                         e.printStackTrace(listener.getLogger());
                     } finally {
-                        // Release current connection to the connection pool
-                        // once you
-                        // are
-                        // done
+                        // Release current connection to the connection pool once you are done
                         put.releaseConnection();
                     }
                 }
@@ -620,6 +629,29 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                 listener.getLogger().println(url + ": unable to locate this Klaros URL");
             }
             return results;
+        }
+
+        /**
+         * Expand build environment variables.
+         *
+         * @param value the value
+         * @param environment the environment variables
+         * @return the expanded string, if applicable
+         * @throws InterruptedException Thrown when a thread is waiting, sleeping, or otherwise paused for a
+         *             long time and another thread interrupts it using the interrupt method in class Thread.
+         */
+        private String expandVariables(final String value, final AbstractBuild<?, ?> build)
+            throws IOException, InterruptedException {
+
+            String result = value;
+            for (Entry<String, String> entry : build.getEnvironment(listener).entrySet()) {
+                result = result.replaceAll("\\$\\{" + entry.getKey() + "\\}", entry.getValue());
+            }
+
+            for (Entry<String, String> entry : build.getBuildVariables().entrySet()) {
+                result = result.replaceAll("\\$\\{" + entry.getKey() + "\\}", entry.getValue());
+            }
+            return result;
         }
 
         /**
