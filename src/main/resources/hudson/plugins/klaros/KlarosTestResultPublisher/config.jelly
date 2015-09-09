@@ -94,6 +94,15 @@
             checkUrl="'descriptorByName/KlarosTestResultPublisher/check?value='+escape(this.value)" />
         </f:entry>
 
+        <f:entry title="${%ResultFormat}" field="format"
+                 description="${%ResultFormatDescription}">
+          <select name="format">
+            <j:forEach var="t" items="${instance.types}">
+              <f:option value="${t.id}" selected="${resultSet.format==t.id}">${t.name}</f:option>
+            </j:forEach>
+          </select>
+        </f:entry>
+    
         <f:entry title="">
           <div align="right">
             <f:repeatableDeleteButton />

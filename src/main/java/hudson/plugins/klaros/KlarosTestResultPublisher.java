@@ -56,6 +56,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.FileRequestEntity;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
@@ -78,6 +79,34 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
     private static final long serialVersionUID = -3220438013049857329L;
 
+    private static final ArrayList<ResultFormat> DEFAULT_FORMATS;
+
+    static {
+        DEFAULT_FORMATS = new ArrayList<ResultFormat>();
+        DEFAULT_FORMATS.add(new ResultFormat("aunit", "AUnit"));
+        DEFAULT_FORMATS.add(new ResultFormat("boosttest", "Boost Test"));
+        DEFAULT_FORMATS.add(new ResultFormat("check", "Check"));
+        DEFAULT_FORMATS.add(new ResultFormat("cpptestunit", "UnitTest++"));
+        DEFAULT_FORMATS.add(new ResultFormat("cppunit", "CppUnit"));
+        DEFAULT_FORMATS.add(new ResultFormat("ctest", "ctest"));
+        DEFAULT_FORMATS.add(new ResultFormat("cunit", "CUnit"));
+        DEFAULT_FORMATS.add(new ResultFormat("fpcunit", "Free Pascal Unit"));
+        DEFAULT_FORMATS.add(new ResultFormat("jubula", "Jubula/GUIDancer"));
+        DEFAULT_FORMATS.add(new ResultFormat("junit", "JUnit"));
+        DEFAULT_FORMATS.add(new ResultFormat("mbunit", "MbUnit"));
+        DEFAULT_FORMATS.add(new ResultFormat("mstest", "MSTest"));
+        DEFAULT_FORMATS.add(new ResultFormat("nunit", "NUnit"));
+        DEFAULT_FORMATS.add(new ResultFormat("phpunit", "PHPUnit"));
+        DEFAULT_FORMATS.add(new ResultFormat("qftest", "QFTest"));
+        DEFAULT_FORMATS.add(new ResultFormat("qtestlib", "QTestLib"));
+        DEFAULT_FORMATS.add(new ResultFormat("ranorex", "Ranorex"));
+        DEFAULT_FORMATS.add(new ResultFormat("tusar", "Tusar"));
+        DEFAULT_FORMATS.add(new ResultFormat("unittest", "UnitTest"));
+        DEFAULT_FORMATS.add(new ResultFormat("testcomplete", "Test Complete"));
+        DEFAULT_FORMATS.add(new ResultFormat("valgrind", "Valgrind"));
+        DEFAULT_FORMATS.add(new ResultFormat("xunitdotnet", "xUnit.net"));
+    }
+    
     /** The Klaros project id. */
     private String config;
 
@@ -91,7 +120,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     private String sut;
 
     /** The type. */
-    private String type = "junit";
+    private String type;
 
     /**
      * The path test results.
@@ -115,6 +144,8 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
     /** The create test suite flag. */
     private boolean createTestSuite;
+
+    private ResultFormat[] types;
 
     /**
      * Instantiates a new Klaros test result publisher.
@@ -145,6 +176,41 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         this.url = url;
         this.username = username;
         this.password = password;
+        this.type = type;
+        this.types = null;
+    }
+
+    private ResultFormat[] loadFormats() {
+
+        final String strURL = buildServletURL(url) + "/supportedFormats";
+
+        GetMethod get = new GetMethod(strURL);
+        StringBuffer query = new StringBuffer();
+        if (StringUtils.isNotEmpty(username)) {
+            query.append("username=").append(username).append("&password=").append(password);
+        }
+        get.setQueryString(query.toString());
+
+        try {
+            HttpClient client = new HttpClient();
+            int result = client.executeMethod(get);
+            if (result == HttpServletResponse.SC_OK) {
+                String response = get.getResponseBodyAsString();
+                if (StringUtils.isNotBlank(response)) {
+                    String[] ids = response.split("=.*\\R");
+                    String[] names = response.split(".*=\\R");
+                    ResultFormat[] formats = new ResultFormat[ids.length];
+                    for (int i=0; i< ids.length; i++ ) {
+                        formats[i] = new ResultFormat(ids[i], names[i]);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // ignore
+        } finally {
+            get.releaseConnection();
+        }
+        return DEFAULT_FORMATS.toArray(new ResultFormat[DEFAULT_FORMATS.size()]);
     }
 
     /**
@@ -297,14 +363,47 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         sut = StringUtils.trim(value);
     }
 
+    /**
+     * Checks if the create test suite flag is set.
+     *
+     * @return true, if set
+     */
     public boolean isCreateTestSuite() {
 
         return createTestSuite;
     }
 
+    /**
+     * Sets the create test suite flag.
+     *
+     * @param createTestSuite the new create test suite flag
+     */
     public void setCreateTestSuite(boolean createTestSuite) {
 
         this.createTestSuite = createTestSuite;
+    }
+
+    /**
+     * Gets the valid result types.
+     *
+     * @return the valid result types
+     */
+    public ResultFormat[] getTypes() {
+
+        if (types == null) {
+            types = loadFormats();
+        }
+        return types;
+    }
+
+    /**
+     * Sets the valid result types.
+     *
+     * @param types the new result types
+     */
+    public void setTypes(ResultFormat[] types) {
+
+        this.types = types;
     }
 
     /**
@@ -337,7 +436,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     private void migratePathTestResults() {
 
         if (StringUtils.isNotEmpty(pathTestResults)) {
-            resultSets = new ResultSet[]{new ResultSet(StringUtils.trim(pathTestResults)) };
+            resultSets = new ResultSet[]{new ResultSet(StringUtils.trim(pathTestResults), "") };
             pathTestResults = null;
         }
     }
@@ -422,7 +521,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                         listener.getLogger().println(
                             "The test result(s) contained in target " + resultSet.getSpec()
                                 + " will be exported to the " + "Klaros-Testmanagement Server at "
-                                + getUrl(url) + ".");
+                                + getUrl(url) + "using the " + resultSet.getFormat() + " format.");
                         listener.getLogger().print("With parameters Project[" + config + "]");
                         if (StringUtils.isNotBlank(iteration)) {
                             listener.getLogger().print(" Iteration[" + iteration + "]");
@@ -582,7 +681,8 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                         query.append("&iteration=").append(expandVariables(iteration, build));
                     }
                     query.append("&env=").append(expandVariables(env, build)).append("&sut=").append(
-                        expandVariables(sut, build)).append("&type=").append(expandVariables(type, build));
+                        expandVariables(sut, build)).append("&type=").append(
+                        expandVariables(resultSet.getFormat(), build));
                     if (createTestSuite) {
                         query.append("&createTestSuiteResults=true");
                     }
@@ -699,7 +799,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         private List<String> urls = new ArrayList<String>();
 
         /**
-         * Instantiates a new descriptor impl.
+         * Instantiates a new descriptor implementation.
          */
         public DescriptorImpl() {
 
@@ -795,8 +895,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                         if (findText(open(new URL(cooked)), "Klaros")) {
                             result = FormValidation.ok();
                         } else {
-                            result = FormValidation.error( //
-                                "This URL does not point to a running Klaros-Testmanagement installation");
+                            result =
+                                FormValidation
+                                    .error("This URL does not point to a running Klaros-Testmanagement installation");
                         }
                     } catch (IOException e) {
                         result = handleIOException(value, e);
