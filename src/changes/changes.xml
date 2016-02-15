@@ -6,7 +6,7 @@
   </properties>
   <body>
 
-    <release version="1.6" date="2015-05-30" description="New features.">
+    <release version="1.6" date="2016-02-15" description="New features.">
       <action dev="stolp" type="add">JENKINS-30369: Support specifying result file formats during result publishing</action>
       <action dev="stolp" type="add">JENKINS-30338: Send additional build information while exporting test results</action>
       <action dev="stolp" type="add">JENKINS-30337: Support build environment and build parameter variables</action>
