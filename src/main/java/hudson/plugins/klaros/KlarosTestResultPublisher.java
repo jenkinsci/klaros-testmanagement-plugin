@@ -748,12 +748,13 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
             throws IOException, InterruptedException {
 
             String result = value;
-            for (Entry<String, String> entry : build.getEnvironment(listener).entrySet()) {
-                result = result.replaceAll("\\$\\{" + entry.getKey() + "\\}", entry.getValue());
-            }
-
-            for (Entry<String, String> entry : build.getBuildVariables().entrySet()) {
-                result = result.replaceAll("\\$\\{" + entry.getKey() + "\\}", entry.getValue());
+            if (result != null) {
+                for (Entry<String, String> entry : build.getEnvironment(listener).entrySet()) {
+                    result = result.replaceAll("\\$\\{" + entry.getKey() + "\\}", entry.getValue());
+                }
+                for (Entry<String, String> entry : build.getBuildVariables().entrySet()) {
+                    result = result.replaceAll("\\$\\{" + entry.getKey() + "\\}", entry.getValue());
+                }
             }
             return result;
         }
