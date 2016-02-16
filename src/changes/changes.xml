@@ -6,6 +6,11 @@
   </properties>
   <body>
 
+    <release version="1.7" date="2016-02-15" description="Fix variable expansion issues, extend list of supported formats.">
+      <action dev="stolp" type="add">JENKINS-32973: Extend the list of supported result file formats to the supported list of Klaros-Testmanagement 4.4</action>
+      <action dev="stolp" type="fix">JENKINS-32972: NullpointerException in KlarosTestResultPublisher:752</action>
+    </release>
+    
     <release version="1.6" date="2016-02-15" description="New features.">
       <action dev="stolp" type="add">JENKINS-30369: Support specifying result file formats during result publishing</action>
       <action dev="stolp" type="add">JENKINS-30338: Send additional build information while exporting test results</action>
