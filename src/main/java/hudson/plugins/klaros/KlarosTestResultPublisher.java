@@ -90,7 +90,12 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         DEFAULT_FORMATS.add(new ResultFormat("cppunit", "CppUnit"));
         DEFAULT_FORMATS.add(new ResultFormat("ctest", "ctest"));
         DEFAULT_FORMATS.add(new ResultFormat("cunit", "CUnit"));
+        DEFAULT_FORMATS.add(new ResultFormat("embunit", "EmbUnit"));
         DEFAULT_FORMATS.add(new ResultFormat("fpcunit", "Free Pascal Unit"));
+        DEFAULT_FORMATS.add(new ResultFormat("googletest", "GoogleTest"));
+        DEFAULT_FORMATS.add(new ResultFormat("gtester", "GLib/gtester"));
+        DEFAULT_FORMATS.add(new ResultFormat("jbehave", "JBehave"));
+        DEFAULT_FORMATS.add(new ResultFormat("jsunit", "JsUnit"));
         DEFAULT_FORMATS.add(new ResultFormat("jubula", "Jubula/GUIDancer"));
         DEFAULT_FORMATS.add(new ResultFormat("junit", "JUnit"));
         DEFAULT_FORMATS.add(new ResultFormat("mbunit", "MbUnit"));
@@ -100,9 +105,10 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         DEFAULT_FORMATS.add(new ResultFormat("qftest", "QFTest"));
         DEFAULT_FORMATS.add(new ResultFormat("qtestlib", "QTestLib"));
         DEFAULT_FORMATS.add(new ResultFormat("ranorex", "Ranorex"));
+        DEFAULT_FORMATS.add(new ResultFormat("tessy", "TESSY"));
+        DEFAULT_FORMATS.add(new ResultFormat("testcomplete", "Test Complete"));
         DEFAULT_FORMATS.add(new ResultFormat("tusar", "Tusar"));
         DEFAULT_FORMATS.add(new ResultFormat("unittest", "UnitTest"));
-        DEFAULT_FORMATS.add(new ResultFormat("testcomplete", "Test Complete"));
         DEFAULT_FORMATS.add(new ResultFormat("valgrind", "Valgrind"));
         DEFAULT_FORMATS.add(new ResultFormat("xunitdotnet", "xUnit.net"));
     }
