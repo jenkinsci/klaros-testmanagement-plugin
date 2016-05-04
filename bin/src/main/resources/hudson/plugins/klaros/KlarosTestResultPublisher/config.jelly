@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ The MIT License
+
+ Copyright (c) 2009,2010,2015 verit Informationssysteme GmbH, Caroline Albuquerque, Torsten Stolpmann
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+-->
+<j:jelly xmlns:j="jelly:core"
+  xmlns:st="jelly:stapler"
+  xmlns:d="jelly:define"
+  xmlns:l="/lib/layout"
+  xmlns:t="/lib/hudson"
+  xmlns:f="/lib/form"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="jelly:core https://github.com/kohsuke/maven-jellydoc-plugin/blob/master/maven-jellydoc-plugin/schemas/core.xsd
+                      jelly:stapler http://stapler.kohsuke.org/taglib.xsd
+                      jelly:define https://github.com/kohsuke/maven-jellydoc-plugin/blob/master/maven-jellydoc-plugin/schemas/define.xsd"
+  >
+
+  <!--
+    This jelly script is used for per-project configuration.
+
+    See global.jelly for a general discussion about jelly script.
+  -->
+
+    <!-- if there's only one Klaros Installation configured, always use that. -->
+
+    <f:entry title="${%KlarosInstallation}"
+             description="${%KlarosInstallationDescription}">
+      <select class="setting-input validated" name="url"
+            checkUrl="'descriptorByName/KlarosTestResultPublisher/checkInstallation?value='+escape(this.value)">
+        <j:forEach var="inst" items="${descriptor.urls}">
+          <f:option selected="${instance.url==inst}">${inst}</f:option>
+        </j:forEach>
+      </select>
+    </f:entry>
+
+    <f:entry title="${%Username}">
+      <f:textbox field="username" />
+    </f:entry>
+
+    <f:entry title="${%Password}">
+      <f:password field="password" />
+    </f:entry>
+
+  <f:validateButton
+   title="${%Test Connection}" progress="${%Testing...}"
+   method="testConnection" with="url,username,password" />
+
+  <f:entry title="${%ProjectID}">
+    <f:textbox field="config" />
+  </f:entry>
+
+  <f:entry title="${%IterationID}">
+    <f:textbox field="iteration" />
+  </f:entry>
+
+  <f:entry title="${%TestEnvironmentID}">
+    <f:textbox field="env" />
+  </f:entry>
+
+  <f:entry title="${%SystemUnderTestID}">
+    <f:textbox field="sut" />
+  </f:entry>
+
+  <f:entry title="${%CreateTestSuite}">
+    <f:checkbox field="createTestSuite" />
+  </f:entry>
+
+  <f:entry title="${%TestResults}" name="resultSets"
+    description="${%ReportDescription('http://ant.apache.org/manual/Types/fileset.html')}">
+    <f:repeatable var="resultSet" items="${instance.resultSets}" name="resultSets" minimum="1" noAddButton="false">
+      <table width="100%">
+        <f:entry title="${%TestResultSpec}" field="spec"
+          description="${%ReportDescription('http://ant.apache.org/manual/Types/fileset.html')}">
+          <f:textbox value="${resultSet.spec}"
+            checkUrl="'descriptorByName/KlarosTestResultPublisher/check?value='+escape(this.value)" />
+        </f:entry>
+
+        <f:entry title="${%ResultFormat}" field="format"
+                 description="${%ResultFormatDescription}">
+          <select name="format">
+            <j:forEach var="t" items="${instance.types}">
+              <f:option value="${t.id}" selected="${resultSet.format==t.id}">${t.name}</f:option>
+            </j:forEach>
+          </select>
+        </f:entry>
+    
+        <f:entry title="">
+          <div align="right">
+            <f:repeatableDeleteButton />
+          </div>
+        </f:entry>
+      </table>
+    </f:repeatable>
+  </f:entry>
+
+</j:jelly>

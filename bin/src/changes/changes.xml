@@ -1,0 +1,55 @@
+<document xmlns="http://maven.apache.org/changes/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/plugins/maven-changes-plugin/xsd/changes-1.0.0.xsd">
+  <properties>
+    <title>Change history</title>
+    <author email="support@verit.de">verit Informationssysteme GmbH</author>
+  </properties>
+  <body>
+
+    <release version="1.7" date="2016-02-15" description="Fix variable expansion issues, extend list of supported formats.">
+      <action dev="stolp" type="add">JENKINS-32973: Extend the list of supported result file formats to the supported list of Klaros-Testmanagement 4.4</action>
+      <action dev="stolp" type="fix">JENKINS-32972: NullpointerException in KlarosTestResultPublisher:752</action>
+    </release>
+    
+    <release version="1.6" date="2016-02-15" description="New features.">
+      <action dev="stolp" type="add">JENKINS-30369: Support specifying result file formats during result publishing</action>
+      <action dev="stolp" type="add">JENKINS-30338: Send additional build information while exporting test results</action>
+      <action dev="stolp" type="add">JENKINS-30337: Support build environment and build parameter variables</action>
+    </release>
+
+    <release version="1.5.1" date="2015-05-30" description="Fix migration issues.">
+      <action dev="stolp" type="fix">JENKINS-28659: Add proper migration of test result path settings for existing projects</action>
+    </release>
+
+    <release version="1.5" date="2015-05-30" description="New features.">
+      <action dev="stolp" type="add">JENKINS-28296: Add support for iteration assignment of imported test runs</action>
+      <action dev="stolp" type="add">JENKINS-27596: Support the creation of test suites on test result import</action>
+      <action dev="stolp" type="add">JENKINS-27593: Do not try to export test results for canceled or broken builds</action>
+      <action dev="stolp" type="fix">JENKINS-27592: Support multiple test result set specifications for uploading</action>
+      <action dev="stolp" type="fix">JENKINS-15744: Whitespace at the end of input fields leads to bogus file upload</action>
+    </release>
+
+    <release version="1.4" date="2011-04-15" description="Slave compatibility fixes.">
+      <action dev="stolp" type="fix">No longer tries to access the master instance on slave nodes.</action>
+      <action dev="stolp" type="fix">No longer sends authentication parameters for empty user names.</action>
+    </release>
+
+    <release version="1.3" date="2011-04-07" description="Slave compatibility fixes.">
+      <action dev="stolp" type="fix">Remote messages from slaves now work correctly.</action>
+    </release>
+
+    <release version="1.2" date="2011-02-14" description="Remove hudson references.">
+      <action dev="mindless" type="fix">Update link in help</action>
+    </release>
+
+    <release version="1.1" date="2010-03-19">
+      <action dev="stolp" type="add">Support for user authentication (Introduced with Klaros 2.6).</action>
+      <action dev="stolp" type="add">Connections to the server can now be tested from the GUI.</action>
+      <action dev="stolp" type="fix">Trailing slashes in application URLs are now handled correctly.</action>
+    </release>
+
+    <release version="1.0" date="2009-10-06" description="Initial release.">
+    </release>
+
+  </body>
+</document>
