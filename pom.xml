@@ -43,6 +43,10 @@
     </developer>
   </developers>
 
+  <properties>
+    <project.scm.id>github-klaros-testmanagement</project.scm.id>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>commons-httpclient</groupId>
