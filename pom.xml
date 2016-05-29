@@ -85,9 +85,10 @@
   </distributionManagement>
 
   <scm>
-    <connection>scm:svn:https://svn.jenkins-ci.org/trunk/hudson/plugins/klaros-testmanagement</connection>
-    <developerConnection>scm:svn:https://svn.jenkins-ci.org/trunk/hudson/plugins/klaros-testmanagement</developerConnection>
-    <url>https://svn.jenkins-ci.org/trunk/hudson/plugins/klaros-testmanagement</url>
+    <connection>scm:git:ssh://github.com/jenkinsci/klaros-testmanagement-plugin.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/klaros-testmanagement-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/klaros-testmanagement-plugin</url>
+    <tag>HEAD</tag>
   </scm>
 
   <build>
