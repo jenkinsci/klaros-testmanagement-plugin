@@ -12,13 +12,17 @@
  */
 package hudson.plugins.klaros;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * The result set specification.
  */
-public class ResultSet {
+public final class ResultSet implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private static final String DEFAULT_FORMAT = "junit";
 
@@ -30,18 +34,29 @@ public class ResultSet {
         format = DEFAULT_FORMAT;
     }
 
+    /**
+     * Instantiates a new result set.
+     *
+     * @param spec the spec
+     */
     public ResultSet(String spec) {
 
         this(spec, DEFAULT_FORMAT);
     }
 
+    /**
+     * Instantiates a new result set from a data bound constructor.
+     *
+     * @param spec the spec
+     * @param format the format
+     */
     @DataBoundConstructor
     public ResultSet(String spec, String format) {
 
         this.spec = StringUtils.strip(spec);
         this.format = StringUtils.strip(format);
         if (StringUtils.isBlank(format)) {
-            format = DEFAULT_FORMAT;
+            this.format = DEFAULT_FORMAT;
         }
     }
 

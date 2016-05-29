@@ -23,6 +23,7 @@
  */
 package hudson.plugins.klaros;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.FilePath.FileCallable;
@@ -46,6 +47,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
@@ -112,7 +114,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         DEFAULT_FORMATS.add(new ResultFormat("valgrind", "Valgrind"));
         DEFAULT_FORMATS.add(new ResultFormat("xunitdotnet", "xUnit.net"));
     }
-    
+
     /** The Klaros project id. */
     private String config;
 
@@ -191,7 +193,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         final String strURL = buildServletURL(url) + "/supportedFormats";
 
         GetMethod get = new GetMethod(strURL);
-        StringBuffer query = new StringBuffer();
+        StringBuilder query = new StringBuilder();
         if (StringUtils.isNotEmpty(username)) {
             query.append("username=").append(username).append("&password=").append(password);
         }
@@ -206,7 +208,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                     String[] ids = response.split("=.*\\R");
                     String[] names = response.split(".*=\\R");
                     ResultFormat[] formats = new ResultFormat[ids.length];
-                    for (int i=0; i< ids.length; i++ ) {
+                    for (int i = 0; i < ids.length; i++) {
                         formats[i] = new ResultFormat(ids[i], names[i]);
                     }
                 }
@@ -485,7 +487,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         if (sourceURL == null) {
             // if only one URL is configured, "default URL" should mean that URL.
             List<String> urls = descriptor().getUrls();
-            if (urls.size() >= 1) {
+            if (!urls.isEmpty()) {
                 result = urls.get(0);
             }
             return result;
@@ -537,15 +539,27 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
                         try {
                             FileCallableImplementation exporter =
-                                new FileCallableImplementation(build, listener);
+                                new FileCallableImplementation(Hudson.getInstance().getRootUrl(), build
+                                    .getProject().getName(), build.getNumber(), build
+                                    .getEnvironment(listener), build.getBuildVariables(), listener);
                             exporter.setKlarosUrl(getKlarosUrl(url));
                             exporter.setResultSet(resultSet);
+                            exporter.setConfig(config);
+                            exporter.setIteration(iteration);
+                            exporter.setSut(sut);
+                            exporter.setEnv(env);
+                            exporter.setUsername(username);
+                            exporter.setPassword(password);
+                            exporter.setCreateTestSuite(createTestSuite);
                             ws.act(exporter);
 
                         } catch (IOException e) {
                             listener.getLogger().println("Failure to export test result(s).");
                             e.printStackTrace(listener.getLogger());
                         } catch (InterruptedException e) {
+                            listener.getLogger().println("Failure to export test result(s).");
+                            e.printStackTrace(listener.getLogger());
+                        } catch (RuntimeException e) {
                             listener.getLogger().println("Failure to export test result(s).");
                             e.printStackTrace(listener.getLogger());
                         }
@@ -578,7 +592,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
             // if only one URL is configured, "default URL" should mean that
             // URL.
             List<String> urls = descriptor().getUrls();
-            if (urls.size() >= 1) {
+            if (!urls.isEmpty()) {
                 result = urls.get(0);
             }
             return result;
@@ -625,23 +639,42 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     /**
      * The Class FileCallableImplementation.
      */
-    private final class FileCallableImplementation implements FileCallable<List<Integer>> {
+    private static class FileCallableImplementation implements FileCallable<List<Integer>>, Serializable {
 
         private static final long serialVersionUID = 1560913900801548965L;
 
-        private final AbstractBuild<?, ?> build;
         private final BuildListener listener;
+        final EnvVars environment;
+        final Map<String, String> buildVariables;
+
+        private String buildServerUrl;
+        private String buildJobId;
+        private String buildId;
+
         private String klarosUrl;
         private ResultSet resultSet;
+        private String config;
+        private String iteration;
+        private String env;
+        private String sut;
+        private String username;
+        private String password;
+        private boolean createTestSuite;
 
         /**
          * Instantiates a new file callable implementation.
          *
          * @param listener the build listener
          */
-        private FileCallableImplementation(final AbstractBuild<?, ?> build, final BuildListener listener) {
+        private FileCallableImplementation(final String buildServerUrl, final String buildJobId,
+                final int buildNumber, final EnvVars environment, final Map<String, String> buildVariables,
+                final BuildListener listener) {
 
-            this.build = build;
+            this.buildServerUrl = buildServerUrl;
+            this.buildJobId = buildJobId;
+            this.buildId = Integer.toString(buildNumber);
+            this.environment = environment;
+            this.buildVariables = buildVariables;
             this.listener = listener;
         }
 
@@ -681,25 +714,28 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                 // Prepare HTTP PUT
                 for (String f : ds.getIncludedFiles()) {
                     final PutMethod put = new PutMethod(strURL);
-                    final StringBuffer query =
-                        new StringBuffer("config=").append(expandVariables(config, build));
+                    final StringBuilder query =
+                        new StringBuilder("config=").append(expandVariables(config, environment,
+                            buildVariables));
                     if (StringUtils.isNotBlank(iteration)) {
-                        query.append("&iteration=").append(expandVariables(iteration, build));
+                        query.append("&iteration=").append(
+                            expandVariables(iteration, environment, buildVariables));
                     }
-                    query.append("&env=").append(expandVariables(env, build)).append("&sut=").append(
-                        expandVariables(sut, build)).append("&type=").append(
-                        expandVariables(resultSet.getFormat(), build));
+                    query.append("&env=").append(expandVariables(env, environment, buildVariables)).append(
+                        "&sut=").append(expandVariables(sut, environment, buildVariables)).append("&type=")
+                        .append(expandVariables(resultSet.getFormat(), environment, buildVariables));
                     if (createTestSuite) {
                         query.append("&createTestSuiteResults=true");
                     }
 
-                    query.append("&buildServerUrl=").append(Hudson.getInstance().getRootUrl());
-                    query.append("&buildJobId=").append(build.getProject().getName());
-                    query.append("&buildId=").append(build.getNumber());
+                    query.append("&buildServerUrl=").append(buildServerUrl);
+                    query.append("&buildJobId=").append(buildJobId);
+                    query.append("&buildId=").append(buildId);
 
                     if (StringUtils.isNotBlank(username)) {
-                        query.append("&username=").append(expandVariables(username, build)).append(
-                            "&password=").append(expandVariables(password, build));
+                        query.append("&username=").append(
+                            expandVariables(username, environment, buildVariables)).append("&password=")
+                            .append(expandVariables(password, environment, buildVariables));
                     }
                     put.setQueryString(query.toString());
 
@@ -714,8 +750,8 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                         result = httpclient.executeMethod(put);
 
                         if (result != HttpServletResponse.SC_OK) {
-                            StringBuffer msg =
-                                new StringBuffer().append("Export of ").append(file.getName()).append(
+                            StringBuilder msg =
+                                new StringBuilder().append("Export of ").append(file.getName()).append(
                                     " failed - Response status code: ").append(result).append(
                                     " for request URL: ").append(strURL).append("?").append(query);
                             String response = new String(put.getResponseBody());
@@ -736,7 +772,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                     }
                 }
             } else {
-                listener.getLogger().println(url + ": unable to locate this Klaros URL");
+                listener.getLogger().println(klarosUrl + ": unable to locate this Klaros URL");
             }
             return results;
         }
@@ -746,19 +782,21 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
          *
          * @param value the value
          * @param environment the environment variables
+         * @param buildVariables the build variables
          * @return the expanded string, if applicable
+         * @throws IOException Signals that an I/O exception has occurred.
          * @throws InterruptedException Thrown when a thread is waiting, sleeping, or otherwise paused for a
          *             long time and another thread interrupts it using the interrupt method in class Thread.
          */
-        private String expandVariables(final String value, final AbstractBuild<?, ?> build)
-            throws IOException, InterruptedException {
+        private String expandVariables(final String value, final EnvVars environment,
+            final Map<String, String> buildVariables) throws IOException, InterruptedException {
 
             String result = value;
             if (result != null) {
-                for (Entry<String, String> entry : build.getEnvironment(listener).entrySet()) {
+                for (Entry<String, String> entry : environment.entrySet()) {
                     result = result.replaceAll("\\$\\{" + entry.getKey() + "\\}", entry.getValue());
                 }
-                for (Entry<String, String> entry : build.getBuildVariables().entrySet()) {
+                for (Entry<String, String> entry : buildVariables.entrySet()) {
                     result = result.replaceAll("\\$\\{" + entry.getKey() + "\\}", entry.getValue());
                 }
             }
@@ -785,6 +823,75 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
             klarosUrl = value;
         }
 
+        /**
+         * Sets the Klaros project id.
+         *
+         * @param value the new project id
+         */
+        private void setConfig(final String value) {
+
+            config = StringUtils.trim(value);
+        }
+
+        /**
+         * Sets the Klaros iteration id.
+         *
+         * @param iteration the new iteration id
+         */
+        private void setIteration(final String iteration) {
+
+            this.iteration = iteration;
+        }
+
+        /**
+         * Sets the Klaros test environment id.
+         *
+         * @param value the new test environment id
+         */
+        private void setEnv(final String value) {
+
+            env = StringUtils.trim(value);
+        }
+
+        /**
+         * Sets the username.
+         *
+         * @param value the new username
+         */
+        private void setUsername(final String value) {
+
+            username = StringUtils.trim(value);
+        }
+
+        /**
+         * Sets the password.
+         *
+         * @param value the new password
+         */
+        private void setPassword(final String value) {
+
+            password = StringUtils.trim(value);
+        }
+
+        /**
+         * Sets the Klaros system under test id.
+         *
+         * @param value the new system under test id
+         */
+        private void setSut(final String value) {
+
+            sut = StringUtils.trim(value);
+        }
+
+        /**
+         * Sets the create test suite flag.
+         *
+         * @param createTestSuite the new create test suite flag
+         */
+        private void setCreateTestSuite(boolean createTestSuite) {
+
+            this.createTestSuite = createTestSuite;
+        }
     }
 
     /**
@@ -792,13 +899,12 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      * marked as public so that it can be accessed from views.
      */
     @Extension
-    public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+    public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> implements Serializable {
 
-        /** The Constant PROJECT_CONFIG_HTML. */
-        private static final String PROJECT_CONFIG_HTML = //
+        private static final long serialVersionUID = 1L;
+
+        private static final String PROJECT_CONFIG_HTML =
             "/plugin/klaros-testmanagement/help-projectConfig.html";
-
-        /** The Constant URL_NAME. */
         private static final String URL_NAME = "url.name";
 
         /** Global configuration information. */
@@ -894,7 +1000,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                     }
 
                     if (!value.endsWith("/")) {
-                        cooked += '/';
+                        cooked += Character.toString('/');
                     }
 
                     FormValidation result = FormValidation.ok();
@@ -965,7 +1071,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
             final String strURL = buildServletURL(url);
 
             PutMethod put = new PutMethod(strURL);
-            StringBuffer query = new StringBuffer();
+            StringBuilder query = new StringBuilder();
             if (username != null) {
                 query.append("username=").append(username).append("&password=").append(password).append(
                     "&type=").append("check");
@@ -975,7 +1081,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                 RequestEntity entity = new StringRequestEntity("", "text/xml; charset=UTF-8", "UTF-8");
                 put.setRequestEntity(entity);
                 return putResultFile(put);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 return FormValidation.error(e.getMessage());
             }
         }
@@ -995,9 +1101,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                 int result = client.executeMethod(put);
                 String response = "";
                 if (result != HttpServletResponse.SC_OK) {
-                    StringBuffer msg = new StringBuffer();
+                    StringBuilder msg = new StringBuilder();
                     response = new String(put.getResponseBody());
-                    if (response != null && response.length() > 0) {
+                    if (response.length() > 0) {
                         msg.append("Connection failed: ").append(response);
                         System.out.println(msg.toString());
                     }
