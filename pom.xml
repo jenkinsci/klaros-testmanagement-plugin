@@ -4,7 +4,7 @@
   <groupId>hudson.plugins.klaros</groupId>
   <artifactId>klaros-testmanagement</artifactId>
   <packaging>hpi</packaging>
-  <version>1.7.1</version>
+  <version>1.7.1-SNAPSHOT</version>
   <name>Klaros-Testmanagement plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Klaros-Testmanagement+Plugin</url>
   <description>Integrates Jenkins with Klaros-Testmanagement by publishing the test results of a Jenkins build to the Klaros-Testmanagement application.</description>
