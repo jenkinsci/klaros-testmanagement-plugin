@@ -33,7 +33,6 @@ import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Hudson;
 import hudson.remoting.VirtualChannel;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -53,6 +52,7 @@ import java.util.Map.Entry;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -84,7 +84,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     private static final ArrayList<ResultFormat> DEFAULT_FORMATS;
 
     static {
-        DEFAULT_FORMATS = new ArrayList<ResultFormat>();
+        DEFAULT_FORMATS = new ArrayList<>();
         DEFAULT_FORMATS.add(new ResultFormat("aunit", "AUnit"));
         DEFAULT_FORMATS.add(new ResultFormat("boosttest", "Boost Test"));
         DEFAULT_FORMATS.add(new ResultFormat("check", "Check"));
@@ -228,7 +228,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public DescriptorImpl descriptor() {
 
-        return Hudson.getInstance().getDescriptorByType(KlarosTestResultPublisher.DescriptorImpl.class);
+        return Jenkins.getInstance().getDescriptorByType(KlarosTestResultPublisher.DescriptorImpl.class);
     }
 
     /**
@@ -401,7 +401,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         if (types == null) {
             types = loadFormats();
         }
-        return types;
+        return types.clone();
     }
 
     /**
@@ -457,7 +457,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     public ResultSet[] getResultSets() {
 
         migratePathTestResults();
-        return resultSets;
+        return resultSets.clone();
     }
 
     /**
@@ -539,7 +539,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
                         try {
                             FileCallableImplementation exporter =
-                                new FileCallableImplementation(Hudson.getInstance().getRootUrl(), build
+                                new FileCallableImplementation(Jenkins.getInstance().getRootUrl(), build
                                     .getProject().getName(), build.getNumber(), build
                                     .getEnvironment(listener), build.getBuildVariables(), listener);
                             exporter.setKlarosUrl(getKlarosUrl(url));
@@ -606,6 +606,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         return result;
     }
 
+    @Override
     public BuildStepMonitor getRequiredMonitorService() {
 
         return BuildStepMonitor.NONE;
@@ -689,6 +690,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
          *             long time and another thread interrupts it using the interrupt method in class Thread.
          * @see hudson.FilePath.FileCallable#invoke(File, hudson.remoting.VirtualChannel)
          */
+        @Override
         public List<Integer> invoke(final File baseDir, final VirtualChannel channel) throws IOException,
             InterruptedException {
 
