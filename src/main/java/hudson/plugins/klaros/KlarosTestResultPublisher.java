@@ -179,7 +179,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         this.env = env;
         this.sut = sut;
         this.createTestSuite = createTestSuite;
-        this.resultSets = resultSets;
+        this.resultSets = resultSets != null ? resultSets.clone() : null;
         migratePathTestResults();
         this.url = url;
         this.username = username;
@@ -205,21 +205,25 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
             if (result == HttpServletResponse.SC_OK) {
                 String response = get.getResponseBodyAsString();
                 if (StringUtils.isNotBlank(response)) {
-                    String[] ids = response.split("=.*\\R");
-                    String[] names = response.split(".*=\\R");
-                    ResultFormat[] formats = new ResultFormat[ids.length];
-                    for (int i = 0; i < ids.length; i++) {
-                        formats[i] = new ResultFormat(ids[i], names[i]);
+                    String[] lines = response.split("\n");
+                    List<ResultFormat> formats = new ArrayList<>(lines.length);
+                    for (String line : lines) {
+                        if (line.contains("=")) {
+                            String id = line.substring(0, line.lastIndexOf('='));
+                            String name = line.substring(line.lastIndexOf('=') + 1);
+                            formats.add(new ResultFormat(id, name));
+                        }
                     }
+                    return formats.toArray(new ResultFormat[formats.size()]);
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException | IOException e) {
             // ignore
         } finally {
             get.releaseConnection();
         }
         return DEFAULT_FORMATS.toArray(new ResultFormat[DEFAULT_FORMATS.size()]);
-    }
+   }
 
     /**
      * Descriptor.
@@ -411,7 +415,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public void setTypes(ResultFormat[] types) {
 
-        this.types = types;
+        this.types = types != null ? types.clone() : null;;
     }
 
     /**
@@ -457,7 +461,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     public ResultSet[] getResultSets() {
 
         migratePathTestResults();
-        return resultSets.clone();
+        return resultSets != null ? resultSets.clone() : null;
     }
 
     /**
@@ -467,7 +471,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public void setResultSets(ResultSet[] values) {
 
-        resultSets = values;
+        resultSets = values != null ? values.clone() : null;
     }
 
     /**
@@ -756,7 +760,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                                 new StringBuilder().append("Export of ").append(file.getName()).append(
                                     " failed - Response status code: ").append(result).append(
                                     " for request URL: ").append(strURL).append("?").append(query);
-                            String response = new String(put.getResponseBody());
+                            String response = put.getResponseBodyAsString();
                             if (response != null && response.length() > 0) {
                                 msg.append("\nReason: ").append(response);
                             }
@@ -927,7 +931,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         @Override
         public String getDisplayName() {
 
-            return Messages.DisplayName();
+            return Messages.displayName();
         }
 
         @Override
@@ -1052,7 +1056,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
             if (Util.fixEmpty(value) != null) {
                 return FormValidation.ok();
             } else {
-                return FormValidation.error(Messages.ErrorMissingInstallation());
+                return FormValidation.error(Messages.errorMissingInstallation());
             }
         }
 
@@ -1104,7 +1108,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                 String response = "";
                 if (result != HttpServletResponse.SC_OK) {
                     StringBuilder msg = new StringBuilder();
-                    response = new String(put.getResponseBody());
+                    response = put.getResponseBodyAsString();
                     if (response.length() > 0) {
                         msg.append("Connection failed: ").append(response);
                         System.out.println(msg.toString());
@@ -1112,9 +1116,9 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                     return FormValidation.error(msg.toString());
                 } else {
                     if (response != null && response.length() > 0) {
-                        return FormValidation.ok(Messages.ConnectionEstablished() + ": " + response);
+                        return FormValidation.ok(Messages.connectionEstablished() + ": " + response);
                     } else {
-                        return FormValidation.ok(Messages.ConnectionEstablished());
+                        return FormValidation.ok(Messages.connectionEstablished());
                     }
                 }
             } finally {
