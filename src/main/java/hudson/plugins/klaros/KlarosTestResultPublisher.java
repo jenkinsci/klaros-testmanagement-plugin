@@ -188,32 +188,29 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         this.types = null;
     }
 
+    /**
+     * Load formats from the remote application.
+     *
+     * @return the supported result formats
+     */
     private ResultFormat[] loadFormats() {
 
         final String strURL = buildServletURL(url) + "/supportedFormats";
 
-        GetMethod get = new GetMethod(strURL);
-        StringBuilder query = new StringBuilder();
+        final GetMethod get = new GetMethod(strURL);
+        final StringBuilder query = new StringBuilder();
         if (StringUtils.isNotEmpty(username)) {
             query.append("username=").append(username).append("&password=").append(password);
         }
         get.setQueryString(query.toString());
 
         try {
-            HttpClient client = new HttpClient();
-            int result = client.executeMethod(get);
+            final HttpClient client = new HttpClient();
+            final int result = client.executeMethod(get);
             if (result == HttpServletResponse.SC_OK) {
-                String response = get.getResponseBodyAsString();
+                final String response = get.getResponseBodyAsString();
                 if (StringUtils.isNotBlank(response)) {
-                    String[] lines = response.split("\n");
-                    List<ResultFormat> formats = new ArrayList<>(lines.length);
-                    for (String line : lines) {
-                        if (line.contains("=")) {
-                            String id = line.substring(0, line.lastIndexOf('='));
-                            String name = line.substring(line.lastIndexOf('=') + 1);
-                            formats.add(new ResultFormat(id, name));
-                        }
-                    }
+                    final List<ResultFormat> formats = extractSupportedFormats(response);
                     return formats.toArray(new ResultFormat[formats.size()]);
                 }
             }
@@ -224,6 +221,26 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         }
         return DEFAULT_FORMATS.toArray(new ResultFormat[DEFAULT_FORMATS.size()]);
    }
+
+    /**
+     * Extract supported formats.
+     *
+     * @param content the content as a string
+     * @return the list of supported formats
+     */
+    private List<ResultFormat> extractSupportedFormats(String content) {
+
+        String[] lines = content.split("\n");
+        List<ResultFormat> formats = new ArrayList<>(lines.length);
+        for (String line : lines) {
+            if (line.contains("=")) {
+                String id = line.substring(0, line.lastIndexOf('='));
+                String name = line.substring(line.lastIndexOf('=') + 1);
+                formats.add(new ResultFormat(id, name));
+            }
+        }
+        return formats;
+    }
 
     /**
      * Descriptor.
@@ -270,7 +287,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     }
 
     /**
-     * Gets the Klaros iteration i.
+     * Gets the Klaros iteration id.
      *
      * @return the iteration id
      */
