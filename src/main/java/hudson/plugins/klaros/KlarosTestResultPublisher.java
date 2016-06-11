@@ -232,7 +232,21 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public DescriptorImpl descriptor() {
 
-        return Jenkins.getInstance().getDescriptorByType(KlarosTestResultPublisher.DescriptorImpl.class);
+        return getJenkinsInstance().getDescriptorByType(KlarosTestResultPublisher.DescriptorImpl.class);
+    }
+
+    /**
+     * Gets the Jenkins instance or die trying.
+     *
+     * @return the Jenkins instance
+     */
+    private Jenkins getJenkinsInstance() {
+
+        if (Jenkins.getInstance() != null) {
+            return Jenkins.getInstance();
+        } else {
+            throw new RuntimeException("Jenkins instance not yet initialized");
+        }
     }
 
     /**
@@ -543,7 +557,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
 
                         try {
                             FileCallableImplementation exporter =
-                                new FileCallableImplementation(Jenkins.getInstance().getRootUrl(), build
+                                new FileCallableImplementation(getJenkinsInstance().getRootUrl(), build
                                     .getProject().getName(), build.getNumber(), build
                                     .getEnvironment(listener), build.getBuildVariables(), listener);
                             exporter.setKlarosUrl(getKlarosUrl(url));
