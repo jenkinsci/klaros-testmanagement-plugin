@@ -1146,7 +1146,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                     }
                     return FormValidation.error(msg.toString());
                 } else {
-                    if (response != null && response.length() > 0) {
+                    if (response.length() > 0) {
                         return FormValidation.ok(Messages.connectionEstablished() + ": " + response);
                     } else {
                         return FormValidation.ok(Messages.connectionEstablished());
