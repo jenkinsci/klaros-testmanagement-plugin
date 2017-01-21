@@ -92,7 +92,6 @@
     <connection>scm:git:ssh://github.com/jenkinsci/klaros-testmanagement-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jenkinsci/klaros-testmanagement-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/klaros-testmanagement-plugin</url>
-    <tag>klaros-testmanagement-2.0.0</tag>
   </scm>
 
   <build>
