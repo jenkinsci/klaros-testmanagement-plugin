@@ -163,6 +163,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      * @param iteration the optional Klaros iteration id to use
      * @param env the Klaros test environment id to use
      * @param sut the Klaros system under test id to use
+     * @param createTestSuite if true create a test suite automatically
      * @param type the type of test result to import
      * @param pathTestResults the path to the test results
      * @param resultSets the test result sets
