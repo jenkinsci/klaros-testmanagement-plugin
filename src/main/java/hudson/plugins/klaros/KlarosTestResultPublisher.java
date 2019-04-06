@@ -39,6 +39,7 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 
 import java.io.File;
 import java.io.IOException;
@@ -148,7 +149,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     private String username;
 
     /** The password used to authenticate with Klaros. */
-    private String password;
+    private Secret password;
 
     /** The create test suite flag. */
     private boolean createTestSuite;
@@ -183,7 +184,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         migratePathTestResults();
         this.url = url;
         this.username = username;
-        this.password = password;
+        this.password = Secret.fromString(password);
         this.type = type;
         this.types = null;
     }
@@ -373,7 +374,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public String getPassword() {
 
-        return password;
+        return password.getEncryptedValue();
     }
 
     /**
@@ -383,7 +384,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
      */
     public void setPassword(final String value) {
 
-        password = StringUtils.trim(value);
+        password = Secret.fromString(value);
     }
 
     /**
@@ -584,7 +585,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                             exporter.setSut(sut);
                             exporter.setEnv(env);
                             exporter.setUsername(username);
-                            exporter.setPassword(password);
+                            exporter.setPassword(password.getPlainText());
                             exporter.setCreateTestSuite(createTestSuite);
                             ws.act(exporter);
 
@@ -694,7 +695,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         private String env;
         private String sut;
         private String username;
-        private String password;
+        private Secret password;
         private boolean createTestSuite;
 
         /**
@@ -772,7 +773,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                     if (StringUtils.isNotBlank(username)) {
                         query.append("&username=").append(
                             expandVariables(username, environment, buildVariables)).append("&password=")
-                            .append(expandVariables(password, environment, buildVariables));
+                            .append(expandVariables(password.getPlainText(), environment, buildVariables));
                     }
                     put.setQueryString(query.toString());
 
@@ -907,7 +908,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
          */
         private void setPassword(final String value) {
 
-            password = StringUtils.trim(value);
+            password = Secret.fromString(value);
         }
 
         /**

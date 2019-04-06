@@ -6,6 +6,10 @@
   </properties>
   <body>
 
+    <release version="2.1.0" date="2019-04-06" description="Fix for SECURITY-843.">
+      <action dev="stolp" type="fix">SECURITY-843: Credential Stored in Plain-text</action>
+    </release>
+
     <release version="2.0.0" date="2017-01-21" description="New minimum Jenkins version requirement. Fix slave execution issues.">
       <action dev="stolp" type="fix">JENKINS-34334: java.io.NotSerializableException when plugin is executed on a slave node</action>
     </release>
