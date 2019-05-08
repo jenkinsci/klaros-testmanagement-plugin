@@ -89,15 +89,17 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         DEFAULT_FORMATS.add(new ResultFormat("aunit", "AUnit"));
         DEFAULT_FORMATS.add(new ResultFormat("boosttest", "Boost Test"));
         DEFAULT_FORMATS.add(new ResultFormat("check", "Check"));
-        DEFAULT_FORMATS.add(new ResultFormat("cpptestunit", "UnitTest++"));
         DEFAULT_FORMATS.add(new ResultFormat("cppunit", "CppUnit"));
         DEFAULT_FORMATS.add(new ResultFormat("ctest", "ctest"));
         DEFAULT_FORMATS.add(new ResultFormat("cunit", "CUnit"));
         DEFAULT_FORMATS.add(new ResultFormat("embunit", "EmbUnit"));
+        DEFAULT_FORMATS.add(new ResultFormat("fitnesse", "Fitnesse"));
         DEFAULT_FORMATS.add(new ResultFormat("fpcunit", "Free Pascal Unit"));
         DEFAULT_FORMATS.add(new ResultFormat("googletest", "GoogleTest"));
         DEFAULT_FORMATS.add(new ResultFormat("gtester", "GLib/gtester"));
         DEFAULT_FORMATS.add(new ResultFormat("jbehave", "JBehave"));
+        DEFAULT_FORMATS.add(new ResultFormat("jmeter", "JMeter"));
+        DEFAULT_FORMATS.add(new ResultFormat("jsunit", "JsUnit"));
         DEFAULT_FORMATS.add(new ResultFormat("jsunit", "JsUnit"));
         DEFAULT_FORMATS.add(new ResultFormat("jubula", "Jubula/GUIDancer"));
         DEFAULT_FORMATS.add(new ResultFormat("junit", "JUnit"));
@@ -112,6 +114,8 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         DEFAULT_FORMATS.add(new ResultFormat("testcomplete", "Test Complete"));
         DEFAULT_FORMATS.add(new ResultFormat("tusar", "Tusar"));
         DEFAULT_FORMATS.add(new ResultFormat("unittest", "UnitTest"));
+        DEFAULT_FORMATS.add(new ResultFormat("uft", "UFT/QTP"));
+        DEFAULT_FORMATS.add(new ResultFormat("cpptestunit", "UnitTest++"));
         DEFAULT_FORMATS.add(new ResultFormat("valgrind", "Valgrind"));
         DEFAULT_FORMATS.add(new ResultFormat("xunitdotnet", "xUnit.net"));
     }
