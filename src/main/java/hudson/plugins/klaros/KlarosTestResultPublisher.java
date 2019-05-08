@@ -566,7 +566,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                         listener.getLogger().println(
                             "The test result(s) contained in target " + resultSet.getSpec()
                                 + " will be exported to the " + "Klaros-Testmanagement Server at "
-                                + getUrl(url) + "using the " + resultSet.getFormat() + " format.");
+                                + getUrl(url) + " using the " + resultSet.getFormat() + " format.");
                         listener.getLogger().print("With parameters Project[" + config + "]");
                         if (StringUtils.isNotBlank(iteration)) {
                             listener.getLogger().print(" Iteration[" + iteration + "]");
