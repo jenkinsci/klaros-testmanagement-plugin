@@ -132,9 +132,6 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
     /** The Klaros system under test id. */
     private String sut;
 
-    /** The type. */
-    private String type;
-
     /**
      * The path test results.
      *
@@ -190,7 +187,6 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
         this.url = url;
         this.username = username;
         this.password = Secret.fromString(password);
-        this.type = type;
         this.types = null;
     }
 
@@ -576,7 +572,7 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                             listener.getLogger().print(" Iteration[" + iteration + "]");
                         }
                         listener.getLogger().println(
-                            " Environment[" + env + "], SUT[" + sut + "] and Type[" + type + "].");
+                            " Environment[" + env + "] and SUT[" + sut + "].");
 
                         try {
                             FileCallableImplementation exporter =
@@ -594,6 +590,8 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                             exporter.setCreateTestSuite(createTestSuite);
                             ws.act(exporter);
 
+                            listener.getLogger().println("Test result(s) successfully exported.");
+
                         } catch (IOException e) {
                             listener.getLogger().println("Failure to export test result(s).");
                             e.printStackTrace(listener.getLogger());
@@ -604,8 +602,6 @@ public class KlarosTestResultPublisher extends Recorder implements Serializable 
                             listener.getLogger().println("Failure to export test result(s).");
                             e.printStackTrace(listener.getLogger());
                         }
-
-                        listener.getLogger().println("Test result(s) successfully exported.");
 
                         result = true;
                     }
