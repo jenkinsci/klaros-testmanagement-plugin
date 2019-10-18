@@ -21,7 +21,7 @@ Save the downloaded `*.hpi` file into the `$JENKINS_HOME/plugins` directory. You
 
 In the Jenkins system configuration you are able to specify one or more Klaros-Testmanagement installations which you may publish test results to. The only configuration option is the URL of the application.
 
-![](https://raw.githubusercontent.com/jenkinsci/klaros-testmanagement-plugin/tree/master/src/documentation/Klaros-Testmanagement-InstallationSetup.png)
+![](https://raw.githubusercontent.com/jenkinsci/klaros-testmanagement-plugin/master/src/documentation/Klaros-Testmanagement-InstallationSetup.png)
 
 In the Jenkins project configuration (under Post-build Actions) you can define the following parameters:
 
@@ -34,7 +34,7 @@ In the Jenkins project configuration (under Post-build Actions) you can define t
 * **Create a test suite per result file:** If enabled, there will be a test suite and corresponding test suite result created in Klaros for each result file imported
 * **Test Report files:** Multiple Ant FileSet includes to the result files to be published
 
-![]()https://raw.githubusercontent.com/jenkinsci/klaros-testmanagement-plugin/tree/master/src/documentation/Klaros-Testmanagement-ProjectSetup.png)
+![](https://raw.githubusercontent.com/jenkinsci/klaros-testmanagement-plugin/master/src/documentation/Klaros-Testmanagement-ProjectSetup.png)
 
 
 ## Notes
